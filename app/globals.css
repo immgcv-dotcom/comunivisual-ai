@@ -43,3 +43,26 @@
 .clientType{display:flex;gap:8px;margin-bottom:12px}.clientType button{border:1px solid #d8dde6;background:#fff;border-radius:8px;padding:8px 12px}.clientType button.selected{border-color:var(--primary);color:var(--primary);font-weight:700}.clientSearch{width:100%;box-sizing:border-box;margin:0 0 12px;padding:10px 12px;border:1px solid #d8dde6;border-radius:8px}.danger{margin-top:8px;background:#fff;border:1px solid #dc2626;color:#b91c1c;border-radius:8px;padding:10px;font-weight:700}
 
 .financeFilters{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}.financeFilters button{border:1px solid #d8dde6;background:#fff;border-radius:999px;padding:7px 11px}.financeFilters button.selected{border-color:var(--primary);color:var(--primary);font-weight:700}.financeDue{font-size:12px;color:#667085;white-space:nowrap}.financeDelete{border:0;background:transparent;color:#b91c1c;cursor:pointer;font-size:12px}
+
+/* Professional UI refinement */
+:root{--surface:#fff;--line:#e7eaf0;--muted:#667085;--ink:#101828}
+body{background:#f7f8fa;color:var(--ink)}
+main{padding:32px 38px 72px}
+header{margin-bottom:28px}h1{font-size:28px;font-weight:750;letter-spacing:-.8px}header p{font-size:13px}
+.metric,.panel,.serviceCard{border-color:var(--line);box-shadow:0 1px 2px rgba(16,24,40,.025)}
+.metric{border-radius:12px;padding:19px 20px}.metric b{font-size:24px}
+.kanbanBoard{gap:14px}.kanbanColumn{background:#f1f3f6;border-color:#e4e7ec;border-radius:12px;padding:10px;min-height:520px}
+.kanbanHead{padding:6px 4px 13px}.kanbanHead b{font-size:12px}.kanbanCard{border-radius:11px;padding:15px;box-shadow:0 1px 3px rgba(16,24,40,.04)}
+.kanbanCard:hover{transform:none;box-shadow:0 5px 16px rgba(16,24,40,.08)}
+.drawerOverlay{background:rgba(15,23,42,.42);backdrop-filter:blur(3px)}
+.drawer{width:min(720px,96vw);padding:32px 36px 0;box-shadow:-24px 0 64px rgba(15,23,42,.18)}
+.drawer h2{font-size:25px;letter-spacing:-.5px}.drawerValue{border:1px solid var(--line);background:#fafbfc;border-radius:10px}
+.detailBlock{padding:22px 0}.detailBlock h4,.quoteCommercial h4,.costInputs h4{font-size:13px}
+.action{min-height:40px;border-radius:8px;font-size:11px;font-weight:650}
+.drawerButtons{margin:0 -36px;padding:14px 36px 18px;border-top:1px solid var(--line);box-shadow:0 -8px 22px rgba(16,24,40,.04);z-index:3}
+.drawerButtons.singleAction{grid-template-columns:1fr}
+.completedState{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:16px;background:#ecfdf3;border:1px solid #abefc6;border-radius:10px;padding:13px 15px;color:#067647}
+.completedState b{font-size:12px}.completedState span{font-size:10px;color:#477a64}
+.financeHero{border-radius:14px}.financeCards>div{border-radius:12px}.panel{border-radius:12px}
+.clientRowButton,.stockRow,.catalogRow{transition:background .15s,border-color .15s}.clientRowButton:hover,.stockRow:hover,.catalogRow:hover{background:#f8fafc}
+@media(max-width:760px){main{padding:18px 12px 64px}.drawer{width:100vw;padding:24px 18px 0}.drawerButtons{margin:0 -18px;padding:12px 18px 16px}.completedState{align-items:flex-start;flex-direction:column;gap:3px}}

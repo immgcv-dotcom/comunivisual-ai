@@ -4,7 +4,8 @@ create extension if not exists pgcrypto;
 create table if not exists companies (
  id uuid primary key default gen_random_uuid(),
  name text not null, slug text unique not null,
- document text, phone text, whatsapp text, email text, logo_url text,
+ document text, legal_name text, trade_name text, state_registration text, postal_code text, street text, address_number text, complement text, district text, city text, state text,
+ phone text, whatsapp text, email text, logo_url text,
  primary_color text not null default '#3157ff', accent_color text not null default '#16c79a',
  created_at timestamptz not null default now()
 );

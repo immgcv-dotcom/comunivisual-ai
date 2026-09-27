@@ -29,7 +29,7 @@ const initialServices: Service[] = [
 const money = (v:number) => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 
 export default function Home(){
-  const [section,setSection]=useState<'services'|'finance'|'brand'>('services')
+  const [section,setSection]=useState<'services'|'clients'|'finance'|'brand'>('services')
   const [filter,setFilter]=useState<'Todos'|Stage>('Todos')
   const [services,setServices]=useState(initialServices)
   const [selected,setSelected]=useState<Service|null>(initialServices[0])
@@ -41,8 +41,15 @@ export default function Home(){
   const [newService,setNewService]=useState({client:'',title:'',total:'',due:''})
   const [dbStatus,setDbStatus]=useState<'loading'|'online'|'offline'>('loading')
   const [dragging,setDragging]=useState<string|null>(null)
+  const [clients,setClients]=useState<any[]>([])
+  const [clientForm,setClientForm]=useState({document:'',legalName:'',tradeName:'',stateRegistration:'',phone:'',email:'',postalCode:'',street:'',number:'',district:'',city:'',state:''})
+  const [clientMsg,setClientMsg]=useState('')
 
   useEffect(()=>{(async()=>{try{const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok) throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:Math.round(((stages.indexOf(x.stage as Stage)+1)/stages.length)*100),color:'#3157ff'})));setSelected(null)}}catch{setDbStatus('offline')}})()},[])
+
+  async function loadClients(){const r=await fetch('/api/clients',{cache:'no-store'});if(r.ok)setClients(await r.json())}
+  async function lookupCnpj(){setClientMsg('Consultando CNPJ...');const clean=clientForm.document.replace(/\D/g,'');const r=await fetch('/api/cnpj/'+clean);const x=await r.json();if(!r.ok){setClientMsg(x.error||'Não foi possível consultar');return}setClientForm({...clientForm,...x,document:clean});setClientMsg('Dados encontrados. Confira e salve o cliente.')}
+  async function saveClient(){const r=await fetch('/api/clients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...clientForm,personType:'PJ'})});const x=await r.json();if(!r.ok){setClientMsg(x.error||'Erro ao salvar');return}setClientMsg('Cliente cadastrado com sucesso.');setClientForm({document:'',legalName:'',tradeName:'',stateRegistration:'',phone:'',email:'',postalCode:'',street:'',number:'',district:'',city:'',state:''});await loadClients()}
 
   async function createService(){
     if(!newService.client.trim()||!newService.title.trim()) return
@@ -85,6 +92,7 @@ export default function Home(){
       <div className="brandBlock"><div className="brandLogo">{brand.logoText}</div><div><strong>{brand.name}</strong><span>ERP inteligente</span></div></div>
       <nav>
         <button className={section==='services'?'active':''} onClick={()=>setSection('services')}>▦ <span>Central de Serviços</span></button>
+        <button className={section==='clients'?'active':''} onClick={()=>{setSection('clients');loadClients()}}>♙ <span>Clientes</span></button>
         <button className={section==='finance'?'active':''} onClick={()=>setSection('finance')}>$ <span>Financeiro</span></button>
       </nav>
       <div className="sidebarBottom">
@@ -94,7 +102,7 @@ export default function Home(){
     </aside>
 
     <main>
-      <header><div><h1>{section==='services'?'Central de Serviços':section==='finance'?'Financeiro':'Personalização da Empresa'}</h1><p>{section==='services'?'Do primeiro atendimento à entrega, tudo no mesmo lugar.':section==='finance'?'Caixa, contas, recebimentos e resultado.':'Deixe o sistema com a cara de cada cliente.'} {section==='services'&&<small style={{marginLeft:8}}>Banco: {dbStatus==='online'?'● online':dbStatus==='offline'?'● offline':'conectando...'}</small>}</p></div><div className="headerActions"><button className="ghost">⌕ Pesquisar</button>{section==='services'&&<button className="primary" onClick={()=>setShowNew(true)}>+ Novo serviço</button>}</div></header>
+      <header><div><h1>{section==='services'?'Central de Serviços':section==='clients'?'Clientes':section==='finance'?'Financeiro':'Personalização da Empresa'}</h1><p>{section==='services'?'Do primeiro atendimento à entrega, tudo no mesmo lugar.':section==='clients'?'Cadastre empresas e use os dados diretamente nos orçamentos e OS.':section==='finance'?'Caixa, contas, recebimentos e resultado.':'Deixe o sistema com a cara de cada cliente.'} {section==='services'&&<small style={{marginLeft:8}}>Banco: {dbStatus==='online'?'● online':dbStatus==='offline'?'● offline':'conectando...'}</small>}</p></div><div className="headerActions"><button className="ghost">⌕ Pesquisar</button>{section==='services'&&<button className="primary" onClick={()=>setShowNew(true)}>+ Novo serviço</button>}</div></header>
 
       {section==='services' && <>
         <section className="metrics">
@@ -120,6 +128,16 @@ export default function Home(){
           {!boardServices.some(x=>x.stage===stage)&&<div className="emptyStage">Arraste uma OS para cá</div>}</div>
         </div>)}</section>
       </>}
+
+      {section==='clients' && <section className="clientPage">
+        <div className="panel clientEditor"><div className="panelTitle"><div><h3>Novo cliente</h3><p>Digite o CNPJ para preencher os dados disponíveis automaticamente.</p></div></div>
+          <div className="cnpjRow"><label>CNPJ<input value={clientForm.document} onChange={e=>setClientForm({...clientForm,document:e.target.value})} placeholder="00.000.000/0000-00"/></label><button className="primary" onClick={lookupCnpj}>Consultar CNPJ</button></div>
+          {clientMsg&&<div className="clientMsg">{clientMsg}</div>}
+          <div className="clientGrid"><label>Razão social<input value={clientForm.legalName} onChange={e=>setClientForm({...clientForm,legalName:e.target.value})}/></label><label>Nome fantasia<input value={clientForm.tradeName} onChange={e=>setClientForm({...clientForm,tradeName:e.target.value})}/></label><label>Inscrição Estadual<input value={clientForm.stateRegistration} onChange={e=>setClientForm({...clientForm,stateRegistration:e.target.value})} placeholder="Preencher/confirmar"/></label><label>Telefone<input value={clientForm.phone} onChange={e=>setClientForm({...clientForm,phone:e.target.value})}/></label><label>E-mail<input value={clientForm.email} onChange={e=>setClientForm({...clientForm,email:e.target.value})}/></label><label>CEP<input value={clientForm.postalCode} onChange={e=>setClientForm({...clientForm,postalCode:e.target.value})}/></label><label className="wideField">Endereço<input value={clientForm.street} onChange={e=>setClientForm({...clientForm,street:e.target.value})}/></label><label>Número<input value={clientForm.number} onChange={e=>setClientForm({...clientForm,number:e.target.value})}/></label><label>Bairro<input value={clientForm.district} onChange={e=>setClientForm({...clientForm,district:e.target.value})}/></label><label>Cidade<input value={clientForm.city} onChange={e=>setClientForm({...clientForm,city:e.target.value})}/></label><label>UF<input maxLength={2} value={clientForm.state} onChange={e=>setClientForm({...clientForm,state:e.target.value.toUpperCase()})}/></label></div>
+          <button className="primary wide" onClick={saveClient}>Salvar cliente</button>
+        </div>
+        <div className="panel"><div className="panelTitle"><div><h3>Clientes cadastrados</h3><p>{clients.length} cliente(s)</p></div><button onClick={loadClients}>Atualizar</button></div>{clients.length===0?<div className="emptyClients">Nenhum cliente cadastrado ainda.</div>:clients.map(x=><div className="clientRow" key={x.id}><div><b>{x.trade_name||x.name}</b><span>{x.legal_name||''}</span></div><div><b>{x.document||'Sem documento'}</b><span>{[x.city,x.state].filter(Boolean).join(' / ')}</span></div></div>)}</div>
+      </section>}
 
       {section==='finance' && <section className="financePage">
         <div className="financeHero"><div><span>Saldo projetado</span><h2>{money(38740)}</h2><small>próximos 30 dias</small></div><div className="financeHeroRight"><div><span>A receber</span><b>{money(25680)}</b></div><div><span>A pagar</span><b>{money(9860)}</b></div></div></div>

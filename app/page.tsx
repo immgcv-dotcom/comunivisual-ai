@@ -55,9 +55,13 @@ export default function Home(){
   const [osMaterials,setOsMaterials]=useState<any[]>([])
   const [materialPick,setMaterialPick]=useState({materialId:'',quantity:'1'})
   const [costInputs,setCostInputs]=useState({productionHours:'0',installationHours:'0',machineHours:'0',travelKm:'0'})
+  const [pricing,setPricing]=useState({productionHourCost:'0',installationHourCost:'0',machineHourCost:'0',travelKmCost:'0',taxPercent:'0',commissionPercent:'0',wastePercent:'0',minimumMarginPercent:'0'})
+  const [pricingMsg,setPricingMsg]=useState('')
 
   useEffect(()=>{(async()=>{try{const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok) throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:Math.round(((stages.indexOf(x.stage as Stage)+1)/stages.length)*100),color:'#3157ff',estimatedCost:Number(x.estimated_cost||0),actualCost:Number(x.actual_cost||0),estimatedMargin:Number(x.estimated_margin||0)})));setSelected(null)}}catch{setDbStatus('offline')}})()},[])
 
+  async function loadPricing(){const r=await fetch('/api/pricing-settings',{cache:'no-store'});if(r.ok){const x=await r.json();setPricing({productionHourCost:String(x.production_hour_cost||0),installationHourCost:String(x.installation_hour_cost||0),machineHourCost:String(x.machine_hour_cost||0),travelKmCost:String(x.travel_km_cost||0),taxPercent:String(x.tax_percent||0),commissionPercent:String(x.commission_percent||0),wastePercent:String(x.waste_percent||0),minimumMarginPercent:String(x.minimum_margin_percent||0)})}}
+  async function savePricing(){setPricingMsg('Salvando...');const r=await fetch('/api/pricing-settings',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(pricing)});setPricingMsg(r.ok?'Parâmetros salvos com sucesso.':'Erro ao salvar parâmetros.')}
   async function loadFinance(){const r=await fetch('/api/finance',{cache:'no-store'});if(r.ok)setFinanceEntries(await r.json())}
   async function loadClients(){const r=await fetch('/api/clients',{cache:'no-store'});if(r.ok)setClients(await r.json())}
   async function lookupCnpj(){setClientMsg('Consultando CNPJ...');const clean=clientForm.document.replace(/\D/g,'');const r=await fetch('/api/cnpj/'+clean);const x=await r.json();if(!r.ok){setClientMsg(x.error||'Não foi possível consultar');return}setClientForm({...clientForm,...x,document:clean});setClientMsg('Dados encontrados. Confira e salve o cliente.')}
@@ -117,7 +121,7 @@ export default function Home(){
         <button className={section==='finance'?'active':''} onClick={()=>{setSection('finance');loadFinance()}}>$ <span>Financeiro</span></button>
       </nav>
       <div className="sidebarBottom">
-        <button className={section==='brand'?'active':''} onClick={()=>setSection('brand')}>⚙ <span>Personalização</span></button>
+        <button className={section==='brand'?'active':''} onClick={()=>{setSection('brand');loadPricing()}}>⚙ <span>Personalização</span></button>
         <div className="user"><div className="avatar">IM</div><div><b>Administrador</b><small>Empresa demo</small></div></div>
       </div>
     </aside>
@@ -167,6 +171,8 @@ export default function Home(){
           ['Mercado São Lucas','Entrada OS-1254','+ R$ 2.475,00','Recebido'],['Fornecedor ACM Brasil','Compra de chapas','- R$ 1.180,00','Pago'],['Clínica Vitta','Saldo OS-1248','+ R$ 1.390,00','Pendente'],['Energia','Conta mensal','- R$ 860,00','Agendado']
         ].map((r,i)=><div className="transaction" key={i}><div className="txIcon">{r[2].startsWith('+')?'↓':'↑'}</div><div><b>{r[0]}</b><span>{r[1]}</span></div><strong className={r[2].startsWith('+')?'positive':'negative'}>{r[2]}</strong><em>{r[3]}</em></div>)}</div>
       </section>}
+
+      {section==='brand' && <section className="pricingPanel panel"><div className="panelTitle"><div><h3>Precificação da empresa</h3><p>Estes valores serão usados automaticamente para calcular o custo e a margem das ordens de serviço.</p></div></div><div className="pricingGrid">{[['productionHourCost','Produção / hora (R$)'],['installationHourCost','Instalação / hora (R$)'],['machineHourCost','Máquina / hora (R$)'],['travelKmCost','Deslocamento / km (R$)'],['taxPercent','Impostos (%)'],['commissionPercent','Comissão (%)'],['wastePercent','Desperdício (%)'],['minimumMarginPercent','Margem mínima (%)']].map(([k,label])=><label key={k}>{label}<input type="number" min="0" step="0.01" value={(pricing as any)[k]} onChange={e=>setPricing({...pricing,[k]:e.target.value})}/></label>)}</div><button className="primary" onClick={savePricing}>Salvar parâmetros de precificação</button>{pricingMsg&&<span className="pricingMsg">{pricingMsg}</span>}</section>}
 
       {section==='brand' && <section className="brandPage">
         <div className="panel brandEditor"><div className="panelTitle"><div><h3>Identidade visual</h3><p>Estas configurações podem ser diferentes para cada empresa cliente.</p></div></div>

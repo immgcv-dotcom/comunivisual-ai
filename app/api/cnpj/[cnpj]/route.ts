@@ -1,31 +1,10 @@
 import { NextResponse } from 'next/server'
-
 export const dynamic='force-dynamic'
-
+const map=(x:any,clean:string)=>({document:clean,legalName:x.razao_social||x.nome||'',tradeName:x.nome_fantasia||x.fantasia||x.razao_social||x.nome||'',status:x.descricao_situacao_cadastral||x.situacao||'',phone:x.ddd_telefone_1||x.telefone||'',email:x.email||'',postalCode:String(x.cep||'').replace(/\D/g,''),street:[x.descricao_tipo_de_logradouro,x.logradouro].filter(Boolean).join(' '),number:x.numero||'',complement:x.complemento||'',district:x.bairro||'',city:x.municipio||'',state:x.uf||'',stateRegistration:''})
 export async function GET(_:Request,{params}:{params:Promise<{cnpj:string}>}){
-  const {cnpj}=await params
-  const clean=cnpj.replace(/\D/g,'')
-  if(clean.length!==14) return NextResponse.json({error:'CNPJ inválido'},{status:400})
-  if(/^([0-9])\1{13}$/.test(clean)) return NextResponse.json({error:'CNPJ inválido'},{status:400})
-  try{
-    const r=await fetch(`https://brasilapi.com.br/api/cnpj/v1/${clean}`,{headers:{Accept:'application/json'},next:{revalidate:86400}})
-    if(!r.ok) return NextResponse.json({error:r.status===404?'CNPJ não encontrado':'Não foi possível consultar o CNPJ'},{status:r.status===404?404:502})
-    const x=await r.json()
-    return NextResponse.json({
-      document:clean,
-      legalName:x.razao_social||'',
-      tradeName:x.nome_fantasia||x.razao_social||'',
-      status:x.descricao_situacao_cadastral||'',
-      phone:x.ddd_telefone_1||'',
-      email:x.email||'',
-      postalCode:String(x.cep||'').replace(/\D/g,''),
-      street:[x.descricao_tipo_de_logradouro,x.logradouro].filter(Boolean).join(' '),
-      number:x.numero||'',
-      complement:x.complemento||'',
-      district:x.bairro||'',
-      city:x.municipio||'',
-      state:x.uf||'',
-      stateRegistration:''
-    })
-  }catch{return NextResponse.json({error:'Serviço de consulta indisponível'},{status:502})}
+ const {cnpj}=await params,clean=cnpj.replace(/\D/g,'')
+ if(clean.length!==14||/^([0-9])\1{13}$/.test(clean))return NextResponse.json({error:'CNPJ inválido'},{status:400})
+ const sources=[async()=>{const r=await fetch('https://brasilapi.com.br/api/cnpj/v1/'+clean,{headers:{Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error(String(r.status));return map(await r.json(),clean)},async()=>{const r=await fetch('https://publica.cnpj.ws/cnpj/'+clean,{headers:{Accept:'application/json'},cache:'no-store'});if(!r.ok)throw new Error(String(r.status));const x=await r.json(),e=x.estabelecimento||{};return map({razao_social:x.razao_social,nome_fantasia:e.nome_fantasia,situacao:e.situacao_cadastral,telefone:[e.ddd1,e.telefone1].filter(Boolean).join(''),email:e.email,cep:e.cep,logradouro:e.logradouro,numero:e.numero,complemento:e.complemento,bairro:e.bairro,municipio:e.cidade?.nome||e.cidade,uf:e.estado?.sigla||e.estado},clean)}]
+ let last='';for(const source of sources){try{const data=await source();if(data.legalName)return NextResponse.json(data,{headers:{'Cache-Control':'no-store'}})}catch(e){last=String(e)}}
+ return NextResponse.json({error:'Não foi possível consultar o CNPJ agora. Tente novamente em alguns segundos.',detail:process.env.NODE_ENV==='development'?last:undefined},{status:502})
 }

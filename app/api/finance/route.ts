@@ -8,7 +8,7 @@ export async function GET(){
 }
 
 export async function PATCH(req:Request){
- try{const companyId=await ensureDb();const sql=getDb();const b=await req.json();if(!b.id)return NextResponse.json({error:'Lançamento obrigatório'},{status:400});const status=b.status==='paid'?'paid':'pending';const rows=await sql`update financial_entries set status=${status},paid_at=case when ${status}='paid' then coalesce(paid_at,now()) else null end where id=${b.id} and company_id=${companyId} returning *`;if(!rows.length)return NextResponse.json({error:'Lançamento não encontrado'},{status:404});return NextResponse.json(rows[0])}catch{return NextResponse.json({error:'Erro ao atualizar financeiro'},{status:500})}
+ try{const companyId=await ensureDb();const sql=getDb();const b=await req.json();if(!b.id)return NextResponse.json({error:'Lançamento obrigatório'},{status:400});const current=await sql`select status from financial_entries where id=${b.id} and company_id=${companyId} limit 1`;if(!current.length)return NextResponse.json({error:'Lançamento não encontrado'},{status:404});if(current[0].status==='cancelled')return NextResponse.json({error:'Lançamento cancelado não pode receber baixa.'},{status:409});const status=b.status==='paid'?'paid':'pending';const rows=await sql`update financial_entries set status=${status},paid_at=case when ${status}='paid' then coalesce(paid_at,now()) else null end where id=${b.id} and company_id=${companyId} returning *`;if(!rows.length)return NextResponse.json({error:'Lançamento não encontrado'},{status:404});return NextResponse.json(rows[0])}catch{return NextResponse.json({error:'Erro ao atualizar financeiro'},{status:500})}
 }
 
 export async function POST(req:Request){

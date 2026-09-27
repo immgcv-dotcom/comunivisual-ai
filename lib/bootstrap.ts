@@ -51,6 +51,11 @@ export async function ensureDb(){
  await sql`create table if not exists work_order_events (id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade, work_order_id uuid not null references work_orders(id) on delete cascade, event_type text not null, title text not null, detail text, created_at timestamptz not null default now())`
  await sql`create table if not exists artwork_versions (id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade, work_order_id uuid not null references work_orders(id) on delete cascade, version_no int not null default 1, file_url text not null, file_name text not null, note text, status text not null default 'pending', approved_at timestamptz, created_at timestamptz not null default now(), unique(work_order_id,version_no))`
  await sql`create table if not exists work_order_tasks (id uuid primary key default gen_random_uuid(), work_order_id uuid not null references work_orders(id) on delete cascade, title text not null, task_type text not null default 'production', status text not null default 'pending', sort_order int not null default 0, created_at timestamptz not null default now())`
+ await sql`alter table work_order_tasks add column if not exists sector text not null default 'Produção'`
+ await sql`alter table work_order_tasks add column if not exists responsible text`
+ await sql`alter table work_order_tasks add column if not exists started_at timestamptz`
+ await sql`alter table work_order_tasks add column if not exists completed_at timestamptz`
+ await sql`alter table work_order_tasks add column if not exists estimated_minutes int not null default 0`
  await sql`create unique index if not exists work_order_task_unique on work_order_tasks(work_order_id,title)`
  await sql`alter table work_orders add column if not exists approved_at timestamptz`
  await sql`alter table work_orders add column if not exists approval_note text`

@@ -27,3 +27,5 @@
 .whatsappAction{border-color:#b7e4c7!important;background:#f0fff4!important;color:#137a3d!important;font-weight:700}
 
 .catalogQuick{margin-bottom:8px}.catalogQuick select{width:100%;box-sizing:border-box;border:1px solid #d8dde6;border-radius:8px;padding:9px;background:#fff;color:#344054;font:inherit}
+
+.measureBox{margin:0 0 9px;padding:10px;border:1px dashed #cfd7e6;border-radius:9px;background:#f8faff}.measureBox>b{font-size:9px}.measureBox>div{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:7px 0}.measureBox label{font-size:8px;color:#667085}.measureBox input{display:block;width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #d8dde6;border-radius:7px;padding:7px;background:#fff}.measureBox>span{margin-left:8px;font-size:9px;font-weight:700;color:#3157ff}@media(max-width:560px){.measureBox>div{grid-template-columns:1fr}}

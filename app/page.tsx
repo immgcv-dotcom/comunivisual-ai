@@ -48,6 +48,8 @@ export default function Home(){
   const [selected,setSelected]=useState<Service|null>(initialServices[0])
   const [brand,setBrand]=useState({name:'ComuniVisual AI', primary:'#3157ff', accent:'#16c79a', logoText:'CV'})
   const [draftBrand,setDraftBrand]=useState(brand)
+  const [companyInfo,setCompanyInfo]=useState({document:'',phone:'',whatsapp:'',email:'',logoUrl:''})
+  const [companyMsg,setCompanyMsg]=useState('')
   const [showNew,setShowNew]=useState(false)
   const [aiText,setAiText]=useState('')
   const [aiResult,setAiResult]=useState<string | null>(null)
@@ -92,6 +94,8 @@ export default function Home(){
   async function addCatalogMaterial(){if(!catalogEdit.id||!catalogMaterialForm.materialId)return;const r=await fetch('/api/catalog-materials',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({catalogId:catalogEdit.id,...catalogMaterialForm})});if(r.ok){setCatalogMaterialForm({materialId:'',consumptionPerUnit:'1',wastePercent:'0'});await loadCatalogMaterials(catalogEdit.id)}}
   async function removeCatalogMaterial(id:string){if(!catalogEdit.id)return;const r=await fetch('/api/catalog-materials',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});if(r.ok)await loadCatalogMaterials(catalogEdit.id)}
   async function saveCatalogEdit(){if(!catalogEdit.id)return;const r=await fetch('/api/catalog',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(catalogEdit)});if(r.ok){await loadCatalog();setCatalogEdit({id:'',basePrice:'0',productionHours:'0',installationHours:'0',machineHours:'0'})}}
+  async function loadCompany(){const r=await fetch('/api/health',{cache:'no-store'});if(!r.ok)return;const x=await r.json();if(!x.company)return;const b={name:x.company.name||'ComuniVisual AI',primary:x.company.primary_color||'#3157ff',accent:x.company.accent_color||'#16c79a',logoText:(x.company.name||'CV').split(/\s+/).map((v:string)=>v[0]).join('').slice(0,3).toUpperCase()};setBrand(b);setDraftBrand(b);setCompanyInfo({document:x.company.document||'',phone:x.company.phone||'',whatsapp:x.company.whatsapp||'',email:x.company.email||'',logoUrl:x.company.logo_url||''})}
+  async function saveCompany(){setCompanyMsg('Salvando...');const r=await fetch('/api/company-settings',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({...companyInfo,name:draftBrand.name,primary:draftBrand.primary,accent:draftBrand.accent})});if(r.ok){setBrand(draftBrand);setCompanyMsg('Identidade salva com sucesso.')}else setCompanyMsg('Não foi possível salvar a identidade.')}
   async function loadPricing(){const r=await fetch('/api/pricing-settings',{cache:'no-store'});if(r.ok){const x=await r.json();setPricing({productionHourCost:String(x.production_hour_cost||0),installationHourCost:String(x.installation_hour_cost||0),machineHourCost:String(x.machine_hour_cost||0),travelKmCost:String(x.travel_km_cost||0),taxPercent:String(x.tax_percent||0),commissionPercent:String(x.commission_percent||0),wastePercent:String(x.waste_percent||0),minimumMarginPercent:String(x.minimum_margin_percent||0)})}}
   async function savePricing(){setPricingMsg('Salvando...');const r=await fetch('/api/pricing-settings',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(pricing)});setPricingMsg(r.ok?'Parâmetros salvos com sucesso.':'Erro ao salvar parâmetros.')}
   async function addFinanceEntry(){const r=await fetch('/api/finance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(financeForm)});if(r.ok){setFinanceForm({entryType:'receivable',description:'',amount:'',dueDate:''});await loadFinance()}}
@@ -161,7 +165,7 @@ export default function Home(){
         <button className={section==='finance'?'active':''} onClick={()=>{setSection('finance');loadFinance()}}>$ <span>Financeiro</span></button><button className={section==='catalog'?'active':''} onClick={()=>{setSection('catalog');loadCatalog()}}>▤ <span>Catálogo</span></button><button className={section==='stock'?'active':''} onClick={()=>{setSection('stock');loadMaterials()}}>▥ <span>Estoque</span></button>
       </nav>
       <div className="sidebarBottom">
-        <button className={section==='brand'?'active':''} onClick={()=>{setSection('brand');loadPricing()}}>⚙ <span>Personalização</span></button>
+        <button className={section==='brand'?'active':''} onClick={()=>{setSection('brand');loadPricing();loadCompany()}}>⚙ <span>Personalização</span></button>
         <div className="user"><div className="avatar">IM</div><div><b>Administrador</b><small>Empresa demo</small></div></div>
       </div>
     </aside>
@@ -219,9 +223,9 @@ export default function Home(){
       {section==='brand' && <section className="brandPage">
         <div className="panel brandEditor"><div className="panelTitle"><div><h3>Identidade visual</h3><p>Estas configurações podem ser diferentes para cada empresa cliente.</p></div></div>
           <label>Nome do sistema/empresa<input value={draftBrand.name} onChange={e=>setDraftBrand({...draftBrand,name:e.target.value})}/></label>
-          <label>Iniciais da logo<input maxLength={3} value={draftBrand.logoText} onChange={e=>setDraftBrand({...draftBrand,logoText:e.target.value.toUpperCase()})}/></label>
+          <label>CNPJ / documento<input value={companyInfo.document} onChange={e=>setCompanyInfo({...companyInfo,document:e.target.value})}/></label><label>Telefone<input value={companyInfo.phone} onChange={e=>setCompanyInfo({...companyInfo,phone:e.target.value})}/></label><label>WhatsApp<input value={companyInfo.whatsapp} onChange={e=>setCompanyInfo({...companyInfo,whatsapp:e.target.value})}/></label><label>E-mail<input type="email" value={companyInfo.email} onChange={e=>setCompanyInfo({...companyInfo,email:e.target.value})}/></label><label>URL da logo<input value={companyInfo.logoUrl} onChange={e=>setCompanyInfo({...companyInfo,logoUrl:e.target.value})} placeholder="https://..."/></label><label>Iniciais da logo<input maxLength={3} value={draftBrand.logoText} onChange={e=>setDraftBrand({...draftBrand,logoText:e.target.value.toUpperCase()})}/></label>
           <div className="colorFields"><label>Cor principal<input type="color" value={draftBrand.primary} onChange={e=>setDraftBrand({...draftBrand,primary:e.target.value})}/></label><label>Cor de destaque<input type="color" value={draftBrand.accent} onChange={e=>setDraftBrand({...draftBrand,accent:e.target.value})}/></label></div>
-          <button className="primary wide" onClick={()=>setBrand(draftBrand)}>Aplicar identidade</button>
+          <button className="primary wide" onClick={saveCompany}>Salvar identidade</button>{companyMsg&&<span className="pricingMsg">{companyMsg}</span>}
         </div>
         <div className="previewBox"><span>Pré-visualização</span><div className="miniApp"><div className="miniSide"><div className="brandLogo">{draftBrand.logoText}</div><b>{draftBrand.name}</b><i style={{background:draftBrand.primary}}></i><i></i><i></i></div><div className="miniMain"><div className="miniHead"></div><div className="miniBanner" style={{background:draftBrand.primary}}></div><div className="miniCards"><i/><i/><i/></div><div className="miniAccent" style={{background:draftBrand.accent}}></div></div></div><p>Logo completa, ícone, favicon, cores, documentos e PDFs poderão seguir a mesma identidade.</p></div>
       </section>}

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-type Stage = 'Orçamento' | 'Aprovado' | 'Arte' | 'Produção' | 'Instalação' | 'Concluído'
+type Stage = 'Atendimento' | 'Orçamento' | 'Aprovado' | 'Arte' | 'Produção' | 'Instalação' | 'Concluído'
 type Service = {
   id: string
   dbId?: string
@@ -15,7 +15,7 @@ type Service = {
   color: string
 }
 
-const stages: Stage[] = ['Orçamento', 'Aprovado', 'Arte', 'Produção', 'Instalação', 'Concluído']
+const stages: Stage[] = ['Atendimento', 'Orçamento', 'Aprovado', 'Arte', 'Produção', 'Instalação', 'Concluído']
 
 const initialServices: Service[] = [
   { id:'OS-1254', client:'Mercado São Lucas', title:'Fachada ACM + letras caixa', value:4950, stage:'Produção', due:'04/10', progress:68, color:'#2f6fed' },
@@ -40,6 +40,7 @@ export default function Home(){
   const [aiResult,setAiResult]=useState<string | null>(null)
   const [newService,setNewService]=useState({client:'',title:'',total:'',due:''})
   const [dbStatus,setDbStatus]=useState<'loading'|'online'|'offline'>('loading')
+  const [dragging,setDragging]=useState<string|null>(null)
 
   useEffect(()=>{(async()=>{try{const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok) throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:Math.round(((stages.indexOf(x.stage as Stage)+1)/stages.length)*100),color:'#3157ff'})));setSelected(null)}}catch{setDbStatus('offline')}})()},[])
 
@@ -52,17 +53,23 @@ export default function Home(){
   }
 
   const filtered=useMemo(()=> filter==='Todos'?services:services.filter(s=>s.stage===filter),[filter,services])
+  const boardServices=filter==='Todos'?services:filtered
   const totalOpen=services.filter(s=>s.stage!=='Concluído').reduce((a,b)=>a+b.value,0)
   const totalDone=services.filter(s=>s.stage==='Concluído').reduce((a,b)=>a+b.value,0)
+
+  async function setStage(s:Service,next:Stage){
+    if(s.stage===next) return
+    const progress=Math.round(((stages.indexOf(next)+1)/stages.length)*100)
+    const updated={...s,stage:next,progress}
+    setServices(prev=>prev.map(x=>x.id===s.id?updated:x))
+    if(selected?.id===s.id) setSelected(updated)
+    if(s.dbId){const r=await fetch('/api/services',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:s.dbId,stage:next})});if(!r.ok)setDbStatus('offline')}
+  }
 
   async function moveStage(s:Service,dir:number){
     const idx=stages.indexOf(s.stage)
     const next=stages[Math.max(0,Math.min(stages.length-1,idx+dir))]
-    const progress=Math.round(((stages.indexOf(next)+1)/stages.length)*100)
-    const updated={...s,stage:next,progress}
-    setServices(prev=>prev.map(x=>x.id===s.id?updated:x))
-    setSelected(updated)
-    if(s.dbId){const r=await fetch('/api/services',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:s.dbId,stage:next})});if(!r.ok)setDbStatus('offline')}
+    await setStage(s,next)
   }
 
   function runAI(){
@@ -101,13 +108,17 @@ export default function Home(){
 
         <div className="filters"><button className={filter==='Todos'?'selected':''} onClick={()=>setFilter('Todos')}>Todos <em>{services.length}</em></button>{stages.map(s=><button key={s} className={filter===s?'selected':''} onClick={()=>setFilter(s)}>{s} <em>{services.filter(x=>x.stage===s).length}</em></button>)}</div>
 
-        <section className="serviceGrid">{filtered.map(s=><article className="serviceCard" key={s.id} onClick={()=>setSelected(s)}>
-          <div className="cardTop"><span className="os">{s.id}</span><span className={'pill '+s.stage.toLowerCase().replace('ç','c').replace('ã','a')}>{s.stage}</span></div>
-          <h3>{s.client}</h3><p>{s.title}</p>
-          <div className="cardMeta"><span>Entrega <b>{s.due}</b></span><strong>{money(s.value)}</strong></div>
-          <div className="progress"><i style={{width:`${s.progress}%`,background:s.color}}/></div>
-          <div className="cardFoot"><span>{s.progress}% concluído</span><span>Ver serviço →</span></div>
-        </article>)}</section>
+        <section className="kanbanBoard">{stages.map(stage=><div className="kanbanColumn" key={stage} onDragOver={e=>e.preventDefault()} onDrop={async e=>{e.preventDefault();const id=e.dataTransfer.getData('text/plain');const item=services.find(x=>x.id===id);setDragging(null);if(item) await setStage(item,stage)}}>
+          <div className="kanbanHead"><div><b>{stage}</b><span>{boardServices.filter(x=>x.stage===stage).length}</span></div><small>{money(boardServices.filter(x=>x.stage===stage).reduce((a,b)=>a+b.value,0))}</small></div>
+          <div className="kanbanList">{boardServices.filter(x=>x.stage===stage).map(s=><article draggable className={'serviceCard kanbanCard '+(dragging===s.id?'dragging':'')} key={s.id} onDragStart={e=>{setDragging(s.id);e.dataTransfer.setData('text/plain',s.id);e.dataTransfer.effectAllowed='move'}} onDragEnd={()=>setDragging(null)} onClick={()=>setSelected(s)}>
+            <div className="cardTop"><span className="os">{s.id}</span><span className="dragHandle" title="Arraste para outra etapa">⋮⋮</span></div>
+            <h3>{s.client}</h3><p>{s.title}</p>
+            <div className="cardMeta"><span>Entrega <b>{s.due}</b></span><strong>{money(s.value)}</strong></div>
+            <div className="progress"><i style={{width:`${s.progress}%`,background:s.color}}/></div>
+            <div className="cardFoot"><span>{s.progress}%</span><span>Detalhes →</span></div>
+          </article>)}
+          {!boardServices.some(x=>x.stage===stage)&&<div className="emptyStage">Arraste uma OS para cá</div>}</div>
+        </div>)}</section>
       </>}
 
       {section==='finance' && <section className="financePage">

@@ -66,3 +66,8 @@ header{margin-bottom:28px}h1{font-size:28px;font-weight:750;letter-spacing:-.8px
 .financeHero{border-radius:14px}.financeCards>div{border-radius:12px}.panel{border-radius:12px}
 .clientRowButton,.stockRow,.catalogRow{transition:background .15s,border-color .15s}.clientRowButton:hover,.stockRow:hover,.catalogRow:hover{background:#f8fafc}
 @media(max-width:760px){main{padding:18px 12px 64px}.drawer{width:100vw;padding:24px 18px 0}.drawerButtons{margin:0 -18px;padding:12px 18px 16px}.completedState{align-items:flex-start;flex-direction:column;gap:3px}}
+
+.osTabs{display:flex;gap:4px;padding:4px;background:#f2f4f7;border:1px solid #e4e7ec;border-radius:10px;margin:-8px 0 22px;position:sticky;top:-32px;z-index:2}
+.osTabs button{flex:1;border:0;background:transparent;color:#667085;border-radius:7px;padding:9px 8px;font-size:10px;font-weight:750;cursor:pointer}
+.osTabs button:hover{color:#344054}.osTabs button.active{background:#fff;color:#101828;box-shadow:0 1px 3px rgba(16,24,40,.1)}
+@media(max-width:760px){.osTabs{top:-24px;overflow:auto}.osTabs button{min-width:90px}}

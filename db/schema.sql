@@ -65,6 +65,7 @@ create table if not exists work_orders (
  installation_hours numeric(10,2) not null default 0, machine_hours numeric(10,2) not null default 0,
  travel_km numeric(10,2) not null default 0, approved_at timestamptz, approval_note text,
  public_token uuid, public_approved_at timestamptz, public_token_expires_at timestamptz, public_approved_name text,
+ installation_scheduled_at timestamptz, installation_team text, installation_address text, installation_notes text, installed_at timestamptz,
  created_at timestamptz not null default now(), unique(company_id,code)
 );
 create unique index if not exists work_orders_public_token_uidx on work_orders(public_token) where public_token is not null;
@@ -94,10 +95,24 @@ create table if not exists work_order_item_materials (
 
 create table if not exists work_order_tasks (
  id uuid primary key default gen_random_uuid(), work_order_id uuid not null references work_orders(id) on delete cascade,
- title text not null, task_type text not null default 'production', status text not null default 'pending',
- sort_order int not null default 0, created_at timestamptz not null default now()
+ title text not null, task_type text not null default 'production', status text not null default 'pending', sector text not null default 'Produção', responsible text,
+ started_at timestamptz, completed_at timestamptz, estimated_minutes int not null default 0, sort_order int not null default 0, created_at timestamptz not null default now()
 );
 create unique index if not exists work_order_task_unique on work_order_tasks(work_order_id,title);
+
+
+create table if not exists artwork_versions (
+ id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade,
+ work_order_id uuid not null references work_orders(id) on delete cascade, version_no int not null default 1,
+ file_url text not null, file_name text not null, note text, status text not null default 'pending', approved_at timestamptz,
+ created_at timestamptz not null default now(), unique(work_order_id,version_no)
+);
+
+create table if not exists work_order_events (
+ id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade,
+ work_order_id uuid not null references work_orders(id) on delete cascade, event_type text not null,
+ title text not null, detail text, created_at timestamptz not null default now()
+);
 
 create table if not exists inventory_movements (
  id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade,

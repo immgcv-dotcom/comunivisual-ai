@@ -21,6 +21,9 @@ export async function ensureDb(){
  await sql`create table if not exists service_catalog (id uuid primary key default gen_random_uuid(), company_id uuid references companies(id) on delete cascade, category text not null, name text not null, unit text not null default 'un', description text, base_price numeric(14,2) not null default 0, formula_type text not null default 'fixed', active boolean not null default true, created_at timestamptz not null default now())`
  await sql`create unique index if not exists service_catalog_company_name_uidx on service_catalog(coalesce(company_id,'00000000-0000-0000-0000-000000000000'::uuid),name)`
  await sql`create table if not exists company_pricing_settings (company_id uuid primary key references companies(id) on delete cascade, production_hour_cost numeric(14,2) not null default 0, installation_hour_cost numeric(14,2) not null default 0, machine_hour_cost numeric(14,2) not null default 0, travel_km_cost numeric(14,2) not null default 0, tax_percent numeric(7,3) not null default 0, commission_percent numeric(7,3) not null default 0, waste_percent numeric(7,3) not null default 0, minimum_margin_percent numeric(7,3) not null default 0, updated_at timestamptz not null default now())`
+ await sql`alter table service_catalog add column if not exists production_hours_per_unit numeric(10,3) not null default 0`
+ await sql`alter table service_catalog add column if not exists installation_hours_per_unit numeric(10,3) not null default 0`
+ await sql`alter table service_catalog add column if not exists machine_hours_per_unit numeric(10,3) not null default 0`
  await sql`alter table work_orders add column if not exists quote_valid_until date`
  await sql`alter table work_orders add column if not exists payment_terms text`
  await sql`alter table work_orders add column if not exists quote_notes text`

@@ -6,6 +6,7 @@ export async function GET(_:Request,{params}:{params:Promise<{cnpj:string}>}){
   const {cnpj}=await params
   const clean=cnpj.replace(/\D/g,'')
   if(clean.length!==14) return NextResponse.json({error:'CNPJ inválido'},{status:400})
+  if(/^([0-9])\1{13}$/.test(clean)) return NextResponse.json({error:'CNPJ inválido'},{status:400})
   try{
     const r=await fetch(`https://brasilapi.com.br/api/cnpj/v1/${clean}`,{headers:{Accept:'application/json'},next:{revalidate:86400}})
     if(!r.ok) return NextResponse.json({error:r.status===404?'CNPJ não encontrado':'Não foi possível consultar o CNPJ'},{status:r.status===404?404:502})

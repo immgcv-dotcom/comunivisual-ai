@@ -12,7 +12,7 @@ export async function PATCH(req:Request){
 }
 
 export async function POST(req:Request){
- try{const companyId=await ensureDb();const sql=getDb();const b=await req.json();const entryType=b.entryType==='payable'?'payable':'receivable';const description=String(b.description||'').trim();const amount=Math.max(Number(b.amount)||0,0);if(!description||amount<=0)return NextResponse.json({error:'Descrição e valor são obrigatórios'},{status:400});const rows=await sql`insert into financial_entries(company_id,entry_type,description,amount,due_date,status) values(${companyId},${entryType},${description},${amount},${b.dueDate||null},'pending') returning *`;return NextResponse.json(rows[0],{status:201})}catch{return NextResponse.json({error:'Erro ao criar lançamento'},{status:500})}
+ try{const companyId=await ensureDb();const sql=getDb();const b=await req.json();const entryType=b.entryType==='payable'?'payable':'receivable';const description=String(b.description||'').trim();const amount=Number(b.amount);if(!description||!Number.isFinite(amount)||amount<=0)return NextResponse.json({error:'Descrição e valor são obrigatórios'},{status:400});const rows=await sql`insert into financial_entries(company_id,entry_type,description,amount,due_date,status) values(${companyId},${entryType},${description},${amount},${b.dueDate||null},'pending') returning *`;return NextResponse.json(rows[0],{status:201})}catch{return NextResponse.json({error:'Erro ao criar lançamento'},{status:500})}
 }
 
 export async function DELETE(req:Request){

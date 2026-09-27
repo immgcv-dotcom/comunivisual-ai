@@ -149,8 +149,9 @@ export default function Home(){
   async function moveStage(s:Service,dir:number){
     const idx=stages.indexOf(s.stage as BoardStage)
     if(idx<0)return
-    const next=stages[Math.max(0,Math.min(stages.length-1,idx+dir))]
-    await setStage(s,next)
+    const target=idx+dir
+    if(target<0||target>=stages.length)return
+    await setStage(s,stages[target])
   }
 
   function runAI(){

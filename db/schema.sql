@@ -1,85 +1,121 @@
--- ComuniVisual AI - PostgreSQL/Neon foundation
+-- ComuniVisual AI - canonical PostgreSQL/Neon schema
 create extension if not exists pgcrypto;
 
 create table if not exists companies (
- id uuid primary key default gen_random_uuid(), name text not null, slug text unique not null,
- logo_url text, primary_color text not null default '#3157ff', accent_color text not null default '#16c79a',
- min_margin numeric(7,2) not null default 35, tax_pct numeric(7,2) not null default 0,
- production_hour_cost numeric(12,2) not null default 0, installation_hour_cost numeric(12,2) not null default 0,
- km_cost numeric(12,2) not null default 0, waste_pct numeric(7,2) not null default 10,
+ id uuid primary key default gen_random_uuid(),
+ name text not null, slug text unique not null,
+ document text, phone text, whatsapp text, email text, logo_url text,
+ primary_color text not null default '#3157ff', accent_color text not null default '#16c79a',
  created_at timestamptz not null default now()
 );
-create table if not exists company_users (
- id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade,
- auth_user_id text not null, full_name text not null, role text not null default 'operator'
- check (role in ('owner','admin','commercial','designer','production','installer','finance','operator')),
- unique(company_id,auth_user_id)
-);
+
 create table if not exists clients (
  id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade,
- name text not null, document text, phone text, whatsapp text, email text, address text, notes text,
- created_at timestamptz not null default now()
+ person_type text not null default 'PJ', name text not null, document text, legal_name text, trade_name text,
+ state_registration text, phone text, whatsapp text, email text, postal_code text, street text,
+ address_number text, complement text, district text, city text, state text, created_at timestamptz not null default now()
 );
-create table if not exists suppliers (
- id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade,
- name text not null, document text, phone text, email text, notes text
-);
+create unique index if not exists clients_company_document_uidx on clients(company_id,document) where document is not null;
+
 create table if not exists service_catalog (
- id uuid primary key default gen_random_uuid(), category text not null, name text not null, unit text not null default 'un',
- formula_key text, default_waste_pct numeric(7,2) not null default 10, active boolean not null default true,
- unique(category,name)
+ id uuid primary key default gen_random_uuid(), company_id uuid references companies(id) on delete cascade,
+ category text not null, name text not null, unit text not null default 'un', description text,
+ base_price numeric(14,2) not null default 0, formula_type text not null default 'fixed', active boolean not null default true,
+ production_hours_per_unit numeric(10,3) not null default 0, installation_hours_per_unit numeric(10,3) not null default 0,
+ machine_hours_per_unit numeric(10,3) not null default 0, created_at timestamptz not null default now()
 );
+create unique index if not exists service_catalog_company_name_uidx on service_catalog(coalesce(company_id,'00000000-0000-0000-0000-000000000000'::uuid),name);
+
+create table if not exists service_catalog_company_settings (
+ company_id uuid not null references companies(id) on delete cascade,
+ service_catalog_id uuid not null references service_catalog(id) on delete cascade,
+ base_price numeric(14,2), production_hours_per_unit numeric(10,3), installation_hours_per_unit numeric(10,3),
+ machine_hours_per_unit numeric(10,3), active boolean, updated_at timestamptz not null default now(),
+ primary key(company_id,service_catalog_id)
+);
+
+create table if not exists company_pricing_settings (
+ company_id uuid primary key references companies(id) on delete cascade,
+ production_hour_cost numeric(14,2) not null default 0, installation_hour_cost numeric(14,2) not null default 0,
+ machine_hour_cost numeric(14,2) not null default 0, travel_km_cost numeric(14,2) not null default 0,
+ tax_percent numeric(7,3) not null default 0, commission_percent numeric(7,3) not null default 0,
+ waste_percent numeric(7,3) not null default 0, minimum_margin_percent numeric(7,3) not null default 0,
+ updated_at timestamptz not null default now()
+);
+
 create table if not exists materials (
  id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade,
- supplier_id uuid references suppliers(id) on delete set null, category text, name text not null, unit text not null,
- cost numeric(12,4) not null default 0, stock_qty numeric(14,4) not null default 0,
- reserved_qty numeric(14,4) not null default 0, min_stock numeric(14,4) not null default 0, active boolean not null default true
+ name text not null, unit text not null default 'un', stock_quantity numeric(14,3) not null default 0,
+ min_stock numeric(14,3) not null default 0, unit_cost numeric(14,2) not null default 0,
+ created_at timestamptz not null default now(), unique(company_id,name)
 );
+
+create table if not exists service_catalog_materials (
+ id uuid primary key default gen_random_uuid(), service_catalog_id uuid not null references service_catalog(id) on delete cascade,
+ material_id uuid not null references materials(id) on delete cascade, consumption_per_unit numeric(14,4) not null default 1,
+ waste_percent numeric(7,3) not null default 0, unique(service_catalog_id,material_id)
+);
+
 create table if not exists work_orders (
  id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade,
  client_id uuid references clients(id) on delete set null, code text not null, title text not null, description text,
- stage text not null default 'Orçamento' check(stage in ('Atendimento','Orçamento','Aprovado','Arte','Produção','Instalação','Concluído','Cancelado')),
- total numeric(14,2) not null default 0, estimated_cost numeric(14,2) not null default 0,
- actual_cost numeric(14,2) not null default 0, due_date date, approved_at timestamptz, completed_at timestamptz,
+ stage text not null default 'Orçamento', total numeric(14,2) not null default 0, estimated_cost numeric(14,2) not null default 0,
+ actual_cost numeric(14,2) not null default 0, due_date date, quote_valid_until date, payment_terms text, quote_notes text,
+ discount numeric(14,2) not null default 0, production_hours numeric(10,2) not null default 0,
+ installation_hours numeric(10,2) not null default 0, machine_hours numeric(10,2) not null default 0,
+ travel_km numeric(10,2) not null default 0, approved_at timestamptz, approval_note text,
+ public_token uuid, public_approved_at timestamptz, public_token_expires_at timestamptz, public_approved_name text,
  created_at timestamptz not null default now(), unique(company_id,code)
 );
+create unique index if not exists work_orders_public_token_uidx on work_orders(public_token) where public_token is not null;
+create index if not exists idx_work_orders_company_stage on work_orders(company_id,stage);
+
 create table if not exists work_order_items (
  id uuid primary key default gen_random_uuid(), work_order_id uuid not null references work_orders(id) on delete cascade,
- catalog_id uuid references service_catalog(id) on delete set null, description text not null, quantity numeric(14,4) not null default 1,
- unit text not null default 'un', unit_price numeric(14,2) not null default 0, cost numeric(14,2) not null default 0,
- specs jsonb not null default '{}'::jsonb
+ catalog_id uuid references service_catalog(id) on delete set null, description text not null,
+ quantity numeric(12,3) not null default 1, unit text not null default 'un', unit_price numeric(14,2) not null default 0,
+ production_hours numeric(10,3) not null default 0, installation_hours numeric(10,3) not null default 0,
+ machine_hours numeric(10,3) not null default 0, created_at timestamptz not null default now()
 );
+
+create table if not exists work_order_materials (
+ id uuid primary key default gen_random_uuid(), work_order_id uuid not null references work_orders(id) on delete cascade,
+ material_id uuid not null references materials(id) on delete restrict, quantity numeric(14,3) not null default 1,
+ reserved_quantity numeric(14,3) not null default 0, created_at timestamptz not null default now(),
+ unique(work_order_id,material_id)
+);
+
+create table if not exists work_order_item_materials (
+ id uuid primary key default gen_random_uuid(), work_order_item_id uuid not null references work_order_items(id) on delete cascade,
+ material_id uuid not null references materials(id) on delete restrict, quantity numeric(14,4) not null default 0,
+ unit_cost numeric(14,2) not null default 0, created_at timestamptz not null default now(),
+ unique(work_order_item_id,material_id)
+);
+
 create table if not exists work_order_tasks (
  id uuid primary key default gen_random_uuid(), work_order_id uuid not null references work_orders(id) on delete cascade,
- title text not null, department text, completed boolean not null default false, sort_order integer not null default 0
+ title text not null, task_type text not null default 'production', status text not null default 'pending',
+ sort_order int not null default 0, created_at timestamptz not null default now()
 );
+create unique index if not exists work_order_task_unique on work_order_tasks(work_order_id,title);
+
 create table if not exists inventory_movements (
  id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade,
- material_id uuid not null references materials(id) on delete cascade, work_order_id uuid references work_orders(id) on delete set null,
- movement_type text not null check(movement_type in ('in','out','reserve','release','adjustment')),
- quantity numeric(14,4) not null, unit_cost numeric(14,4), created_at timestamptz not null default now()
+ material_id uuid not null references materials(id) on delete restrict, work_order_id uuid references work_orders(id) on delete set null,
+ movement_type text not null, quantity numeric(14,3) not null, unit_cost numeric(14,2) not null default 0,
+ created_at timestamptz not null default now()
 );
+create unique index if not exists inventory_os_material_reserve_uidx on inventory_movements(work_order_id,material_id,movement_type) where work_order_id is not null and movement_type='reserve';
+
 create table if not exists financial_entries (
  id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade,
- work_order_id uuid references work_orders(id) on delete set null, client_id uuid references clients(id) on delete set null,
- supplier_id uuid references suppliers(id) on delete set null, entry_type text not null check(entry_type in ('receivable','payable')),
+ work_order_id uuid references work_orders(id) on delete set null, entry_type text not null,
  description text not null, amount numeric(14,2) not null, due_date date, paid_at timestamptz,
- status text not null default 'pending' check(status in ('pending','paid','overdue','cancelled')), created_at timestamptz not null default now()
+ status text not null default 'pending', created_at timestamptz not null default now()
 );
+create unique index if not exists financial_work_order_receivable_uidx on financial_entries(work_order_id,entry_type) where work_order_id is not null and entry_type='receivable';
 create index if not exists idx_clients_company on clients(company_id);
 create index if not exists idx_materials_company on materials(company_id);
-create index if not exists idx_work_orders_company_stage on work_orders(company_id,stage);
 create index if not exists idx_financial_company_due on financial_entries(company_id,due_date);
 
-insert into service_catalog(category,name,unit,formula_key) values
-('Adesivos','Adesivo impressão digital','m²','print_area'),('Adesivos','Adesivo recorte eletrônico','m²','cut_vinyl'),
-('Adesivos','Adesivo perfurado','m²','print_area'),('Adesivos','Envelopamento parcial','m²','vehicle_wrap'),
-('Adesivos','Envelopamento total','m²','vehicle_wrap'),('Lonas','Banner com acabamento','m²','banner'),
-('Lonas','Faixa em lona','m²','banner'),('Lonas','Frontlight','m²','banner'),('Lonas','Backlight','m²','banner'),
-('Placas','Placa em PVC','m²','rigid_board'),('Placas','Placa em ACM','m²','rigid_board'),
-('Placas','Placa em acrílico','m²','rigid_board'),('Fachadas','Fachada em ACM','m²','acm_facade'),
-('Fachadas','Fachada em lona','m²','canvas_facade'),('Fachadas','Totem','un','totem'),
-('Letras','Letra caixa ACM','m²','box_letter'),('Letras','Letra caixa acrílico','m²','box_letter'),
-('Letras','Letra PVC expandido','m²','cut_letter'),('Iluminação','LED para letra caixa','m','led'),
-('Instalação','Equipe de instalação','h','installation_hour')
-on conflict(category,name) do nothing;
+insert into companies(name,slug) values ('Immagine Comunicação Visual','immagine') on conflict(slug) do nothing;

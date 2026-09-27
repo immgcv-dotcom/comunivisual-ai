@@ -22,6 +22,10 @@ type Service = {
   paymentTerms?: string
   quoteNotes?: string
   discount?: number
+  productionHours?: number
+  installationHours?: number
+  machineHours?: number
+  travelKm?: number
 }
 
 const stages: Stage[] = ['Atendimento', 'Orçamento', 'Aprovado', 'Arte', 'Produção', 'Instalação', 'Concluído']
@@ -69,7 +73,7 @@ export default function Home(){
   const [catalogPick,setCatalogPick]=useState('')
   const [measure,setMeasure]=useState({width:'',height:'',quantity:'1'})
 
-  useEffect(()=>{(async()=>{try{const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok) throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:Math.round(((stages.indexOf(x.stage as Stage)+1)/stages.length)*100),color:'#3157ff',estimatedCost:Number(x.estimated_cost||0),actualCost:Number(x.actual_cost||0),estimatedMargin:Number(x.estimated_margin||0),minimumMargin:Number(x.minimum_margin||0),suggestedPrice:Number(x.suggested_price||0),quoteValidUntil:x.quote_valid_until||'',paymentTerms:x.payment_terms||'',quoteNotes:x.quote_notes||'',discount:Number(x.discount||0)})));setSelected(null)}}catch{setDbStatus('offline')}})()},[])
+  useEffect(()=>{(async()=>{try{const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok) throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:Math.round(((stages.indexOf(x.stage as Stage)+1)/stages.length)*100),color:'#3157ff',estimatedCost:Number(x.estimated_cost||0),actualCost:Number(x.actual_cost||0),estimatedMargin:Number(x.estimated_margin||0),minimumMargin:Number(x.minimum_margin||0),suggestedPrice:Number(x.suggested_price||0),quoteValidUntil:x.quote_valid_until||'',paymentTerms:x.payment_terms||'',quoteNotes:x.quote_notes||'',discount:Number(x.discount||0),productionHours:Number(x.production_hours||0),installationHours:Number(x.installation_hours||0),machineHours:Number(x.machine_hours||0),travelKm:Number(x.travel_km||0)})));setSelected(null)}}catch{setDbStatus('offline')}})()},[])
 
   async function loadCatalog(){const r=await fetch('/api/catalog',{cache:'no-store'});if(r.ok)setCatalog(await r.json())}
   async function loadPricing(){const r=await fetch('/api/pricing-settings',{cache:'no-store'});if(r.ok){const x=await r.json();setPricing({productionHourCost:String(x.production_hour_cost||0),installationHourCost:String(x.installation_hour_cost||0),machineHourCost:String(x.machine_hour_cost||0),travelKmCost:String(x.travel_km_cost||0),taxPercent:String(x.tax_percent||0),commissionPercent:String(x.commission_percent||0),wastePercent:String(x.waste_percent||0),minimumMarginPercent:String(x.minimum_margin_percent||0)})}}
@@ -101,7 +105,7 @@ export default function Home(){
     if(s.dbId){const r=await fetch('/api/services',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:s.dbId,stage:next})});if(!r.ok)setDbStatus('offline')}
   }
 
-  async function saveQuoteDetails(){if(!selected?.dbId)return;setQuoteMsg('Salvando...');const r=await fetch('/api/services',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:selected.dbId,quoteDetails})});setQuoteMsg(r.ok?'Condições salvas.':'Erro ao salvar.')}
+  async function saveQuoteDetails(){if(!selected?.dbId)return;setQuoteMsg('Salvando...');const r=await fetch('/api/services',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:selected.dbId,quoteDetails})});if(r.ok){const x=await r.json();const value=Number(x.total||0),discount=Number(x.discount||0);setServices(p=>p.map(s=>s.dbId===selected.dbId?{...s,value,discount}:s));setSelected({...selected,value,discount});setQuoteMsg('Condições salvas.')}else setQuoteMsg('Erro ao salvar.')}
   async function saveCosts(){if(!selected?.dbId)return;const r=await fetch('/api/services',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:selected.dbId,costInputs})});if(r.ok){const x=await r.json();const estimatedCost=Number(x.estimated_cost||0);setServices(p=>p.map(s=>s.dbId===selected.dbId?{...s,estimatedCost}:s));setSelected({...selected,estimatedCost})}}
   async function loadMaterials(s?:Service){const all=await fetch('/api/materials',{cache:'no-store'});if(all.ok)setMaterials(await all.json());if(s?.dbId){const r=await fetch('/api/materials?workOrderId='+s.dbId,{cache:'no-store'});if(r.ok)setOsMaterials(await r.json())}}
   async function addMaterial(){if(!selected?.dbId||!materialPick.materialId)return;const r=await fetch('/api/materials',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workOrderId:selected.dbId,...materialPick})});if(r.ok){setMaterialPick({materialId:'',quantity:'1'});await loadMaterials(selected)}}
@@ -156,7 +160,7 @@ export default function Home(){
 
         <section className="kanbanBoard">{stages.map(stage=><div className="kanbanColumn" key={stage} onDragOver={e=>e.preventDefault()} onDrop={async e=>{e.preventDefault();const id=e.dataTransfer.getData('text/plain');const item=services.find(x=>x.id===id);setDragging(null);if(item) await setStage(item,stage)}}>
           <div className="kanbanHead"><div><b>{stage}</b><span>{boardServices.filter(x=>x.stage===stage).length}</span></div><small>{money(boardServices.filter(x=>x.stage===stage).reduce((a,b)=>a+b.value,0))}</small></div>
-          <div className="kanbanList">{boardServices.filter(x=>x.stage===stage).map(s=><article draggable className={'serviceCard kanbanCard '+(dragging===s.id?'dragging':'')} key={s.id} onDragStart={e=>{setDragging(s.id);e.dataTransfer.setData('text/plain',s.id);e.dataTransfer.effectAllowed='move'}} onDragEnd={()=>setDragging(null)} onClick={()=>{setSelected(s);setQuoteDetails({validUntil:s.quoteValidUntil||'',paymentTerms:s.paymentTerms||'',notes:s.quoteNotes||'',discount:String(s.discount||0)});loadQuoteItems(s);loadTasks(s);loadMaterials(s)}}>
+          <div className="kanbanList">{boardServices.filter(x=>x.stage===stage).map(s=><article draggable className={'serviceCard kanbanCard '+(dragging===s.id?'dragging':'')} key={s.id} onDragStart={e=>{setDragging(s.id);e.dataTransfer.setData('text/plain',s.id);e.dataTransfer.effectAllowed='move'}} onDragEnd={()=>setDragging(null)} onClick={()=>{setSelected(s);setQuoteDetails({validUntil:s.quoteValidUntil||'',paymentTerms:s.paymentTerms||'',notes:s.quoteNotes||'',discount:String(s.discount||0)});setCostInputs({productionHours:String(s.productionHours||0),installationHours:String(s.installationHours||0),machineHours:String(s.machineHours||0),travelKm:String(s.travelKm||0)});loadQuoteItems(s);loadTasks(s);loadMaterials(s)}}>
             <div className="cardTop"><span className="os">{s.id}</span><span className="dragHandle" title="Arraste para outra etapa">⋮⋮</span></div>
             <h3>{s.client}</h3><p>{s.title}</p>
             <div className="cardMeta"><span>Entrega <b>{s.due}</b></span><strong>{money(s.value)}</strong></div>

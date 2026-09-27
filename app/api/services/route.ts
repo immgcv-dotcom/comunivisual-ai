@@ -3,7 +3,7 @@ import { getDb } from '@/lib/db'
 import { ensureDb } from '@/lib/bootstrap'
 export const dynamic='force-dynamic'
 const allowed=['Atendimento','Orçamento','Aprovado','Arte','Produção','Instalação','Concluído','Cancelado']
-export async function GET(){try{const companyId=await ensureDb();const sql=getDb();const rows=await sql`select w.id,w.code,w.title,w.stage,w.total,w.estimated_cost,w.actual_cost,w.approved_at,w.due_date,w.created_at,c.name client from work_orders w left join clients c on c.id=w.client_id where w.company_id=${companyId} order by w.created_at desc`;return NextResponse.json(rows)}catch(e){return NextResponse.json({error:e instanceof Error?e.message:'Erro no banco'},{status:500})}}
+export async function GET(){try{const companyId=await ensureDb();const sql=getDb();const rows=await sql`select w.id,w.code,w.title,w.stage,w.total,w.estimated_cost,w.actual_cost,w.approved_at,w.due_date,w.created_at,c.name client, case when w.total>0 then round(((w.total-w.estimated_cost)/w.total)*100,2) else 0 end estimated_margin from work_orders w left join clients c on c.id=w.client_id where w.company_id=${companyId} order by w.created_at desc`;return NextResponse.json(rows)}catch(e){return NextResponse.json({error:e instanceof Error?e.message:'Erro no banco'},{status:500})}}
 export async function POST(req:Request){try{const companyId=await ensureDb();const sql=getDb();const b=await req.json();if(!b.title?.trim())return NextResponse.json({error:'Serviço é obrigatório'},{status:400});
 let clientId:string|undefined
 let clientName=''

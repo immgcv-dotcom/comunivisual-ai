@@ -46,9 +46,11 @@ export default function Home(){
   const [clientMsg,setClientMsg]=useState('')
   const [quoteItems,setQuoteItems]=useState<any[]>([])
   const [quoteItem,setQuoteItem]=useState({description:'',quantity:'1',unit:'un',unitPrice:''})
+  const [financeEntries,setFinanceEntries]=useState<any[]>([])
 
   useEffect(()=>{(async()=>{try{const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok) throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:Math.round(((stages.indexOf(x.stage as Stage)+1)/stages.length)*100),color:'#3157ff'})));setSelected(null)}}catch{setDbStatus('offline')}})()},[])
 
+  async function loadFinance(){const r=await fetch('/api/finance',{cache:'no-store'});if(r.ok)setFinanceEntries(await r.json())}
   async function loadClients(){const r=await fetch('/api/clients',{cache:'no-store'});if(r.ok)setClients(await r.json())}
   async function lookupCnpj(){setClientMsg('Consultando CNPJ...');const clean=clientForm.document.replace(/\D/g,'');const r=await fetch('/api/cnpj/'+clean);const x=await r.json();if(!r.ok){setClientMsg(x.error||'Não foi possível consultar');return}setClientForm({...clientForm,...x,document:clean});setClientMsg('Dados encontrados. Confira e salve o cliente.')}
   async function saveClient(){const r=await fetch('/api/clients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...clientForm,personType:'PJ'})});const x=await r.json();if(!r.ok){setClientMsg(x.error||'Erro ao salvar');return}setClientMsg('Cliente cadastrado com sucesso.');setClientForm({document:'',legalName:'',tradeName:'',stateRegistration:'',phone:'',email:'',postalCode:'',street:'',number:'',district:'',city:'',state:''});await loadClients()}
@@ -99,7 +101,7 @@ export default function Home(){
       <nav>
         <button className={section==='services'?'active':''} onClick={()=>setSection('services')}>▦ <span>Central de Serviços</span></button>
         <button className={section==='clients'?'active':''} onClick={()=>{setSection('clients');loadClients()}}>♙ <span>Clientes</span></button>
-        <button className={section==='finance'?'active':''} onClick={()=>setSection('finance')}>$ <span>Financeiro</span></button>
+        <button className={section==='finance'?'active':''} onClick={()=>{setSection('finance');loadFinance()}}>$ <span>Financeiro</span></button>
       </nav>
       <div className="sidebarBottom">
         <button className={section==='brand'?'active':''} onClick={()=>setSection('brand')}>⚙ <span>Personalização</span></button>
@@ -146,7 +148,7 @@ export default function Home(){
       </section>}
 
       {section==='finance' && <section className="financePage">
-        <div className="financeHero"><div><span>Saldo projetado</span><h2>{money(38740)}</h2><small>próximos 30 dias</small></div><div className="financeHeroRight"><div><span>A receber</span><b>{money(25680)}</b></div><div><span>A pagar</span><b>{money(9860)}</b></div></div></div>
+        <div className="financeHero"><div><span>Saldo projetado</span><h2>{money(financeEntries.reduce((a:any,x:any)=>a+(x.entry_type==='receivable'?Number(x.amount):-Number(x.amount)),0))}</h2><small>lançamentos atuais</small></div><div className="financeHeroRight"><div><span>A receber</span><b>{money(financeEntries.filter((x:any)=>x.entry_type==='receivable'&&!x.paid_at).reduce((a:any,x:any)=>a+Number(x.amount),0))}</b></div><div><span>A pagar</span><b>{money(financeEntries.filter((x:any)=>x.entry_type==='payable'&&!x.paid_at).reduce((a:any,x:any)=>a+Number(x.amount),0))}</b></div></div></div>
         <div className="financeCards"><div><span>Recebimentos hoje</span><b>{money(4750)}</b><small>3 lançamentos</small></div><div><span>Vencendo esta semana</span><b>{money(6240)}</b><small>7 contas</small></div><div><span>Em atraso</span><b>{money(1320)}</b><small>2 clientes</small></div><div><span>Margem média</span><b>39,8%</b><small>últimos 30 dias</small></div></div>
         <div className="panel"><div className="panelTitle"><h3>Movimentações recentes</h3><button>Ver todas</button></div>{[
           ['Mercado São Lucas','Entrada OS-1254','+ R$ 2.475,00','Recebido'],['Fornecedor ACM Brasil','Compra de chapas','- R$ 1.180,00','Pago'],['Clínica Vitta','Saldo OS-1248','+ R$ 1.390,00','Pendente'],['Energia','Conta mensal','- R$ 860,00','Agendado']

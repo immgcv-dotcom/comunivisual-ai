@@ -28,6 +28,7 @@ export async function ensureDb(){
  await sql`alter table service_catalog add column if not exists production_hours_per_unit numeric(10,3) not null default 0`
  await sql`alter table service_catalog add column if not exists installation_hours_per_unit numeric(10,3) not null default 0`
  await sql`alter table service_catalog add column if not exists machine_hours_per_unit numeric(10,3) not null default 0`
+ await sql`create table if not exists service_catalog_company_settings (company_id uuid not null references companies(id) on delete cascade, service_catalog_id uuid not null references service_catalog(id) on delete cascade, base_price numeric(14,2), production_hours_per_unit numeric(10,3), installation_hours_per_unit numeric(10,3), machine_hours_per_unit numeric(10,3), active boolean, updated_at timestamptz not null default now(), primary key(company_id,service_catalog_id))`
  await sql`alter table work_orders add column if not exists quote_valid_until date`
  await sql`alter table work_orders add column if not exists payment_terms text`
  await sql`alter table work_orders add column if not exists quote_notes text`

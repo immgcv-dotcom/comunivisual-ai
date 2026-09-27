@@ -45,6 +45,9 @@ export async function ensureDb(){
  await sql`create unique index if not exists work_order_task_unique on work_order_tasks(work_order_id,title)`
  await sql`alter table work_orders add column if not exists approved_at timestamptz`
  await sql`alter table work_orders add column if not exists approval_note text`
+ await sql`alter table work_orders add column if not exists public_token uuid`
+ await sql`create unique index if not exists work_orders_public_token_uidx on work_orders(public_token) where public_token is not null`
+ await sql`alter table work_orders add column if not exists public_approved_at timestamptz`
  await sql`create table if not exists financial_entries (id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade, work_order_id uuid references work_orders(id) on delete set null, entry_type text not null, description text not null, amount numeric(14,2) not null, due_date date, paid_at timestamptz, status text not null default 'pending', created_at timestamptz not null default now())`
  await sql`create unique index if not exists financial_work_order_receivable_uidx on financial_entries(work_order_id,entry_type) where work_order_id is not null and entry_type='receivable'`
  let companies=await sql`select id from companies where slug='immagine' limit 1`

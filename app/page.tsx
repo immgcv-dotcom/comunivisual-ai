@@ -1,10 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 type Stage = 'Orçamento' | 'Aprovado' | 'Arte' | 'Produção' | 'Instalação' | 'Concluído'
 type Service = {
   id: string
+  dbId?: string
   client: string
   title: string
   value: number
@@ -37,18 +38,31 @@ export default function Home(){
   const [showNew,setShowNew]=useState(false)
   const [aiText,setAiText]=useState('')
   const [aiResult,setAiResult]=useState<string | null>(null)
+  const [newService,setNewService]=useState({client:'',title:'',total:'',due:''})
+  const [dbStatus,setDbStatus]=useState<'loading'|'online'|'offline'>('loading')
+
+  useEffect(()=>{(async()=>{try{const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok) throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:Math.round(((stages.indexOf(x.stage as Stage)+1)/stages.length)*100),color:'#3157ff'})));setSelected(null)}}catch{setDbStatus('offline')}})()},[])
+
+  async function createService(){
+    if(!newService.client.trim()||!newService.title.trim()) return
+    const r=await fetch('/api/services',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(newService)})
+    if(!r.ok){setDbStatus('offline');return}
+    const x=await r.json(); const item:Service={dbId:x.id,id:x.code,client:x.client,title:x.title,value:Number(x.total),stage:x.stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:17,color:'#3157ff'}
+    setServices(p=>[item,...p]);setShowNew(false);setNewService({client:'',title:'',total:'',due:''});setDbStatus('online')
+  }
 
   const filtered=useMemo(()=> filter==='Todos'?services:services.filter(s=>s.stage===filter),[filter,services])
   const totalOpen=services.filter(s=>s.stage!=='Concluído').reduce((a,b)=>a+b.value,0)
   const totalDone=services.filter(s=>s.stage==='Concluído').reduce((a,b)=>a+b.value,0)
 
-  function moveStage(s:Service,dir:number){
+  async function moveStage(s:Service,dir:number){
     const idx=stages.indexOf(s.stage)
     const next=stages[Math.max(0,Math.min(stages.length-1,idx+dir))]
     const progress=Math.round(((stages.indexOf(next)+1)/stages.length)*100)
     const updated={...s,stage:next,progress}
     setServices(prev=>prev.map(x=>x.id===s.id?updated:x))
     setSelected(updated)
+    if(s.dbId){const r=await fetch('/api/services',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:s.dbId,stage:next})});if(!r.ok)setDbStatus('offline')}
   }
 
   function runAI(){
@@ -73,7 +87,7 @@ export default function Home(){
     </aside>
 
     <main>
-      <header><div><h1>{section==='services'?'Central de Serviços':section==='finance'?'Financeiro':'Personalização da Empresa'}</h1><p>{section==='services'?'Do primeiro atendimento à entrega, tudo no mesmo lugar.':section==='finance'?'Caixa, contas, recebimentos e resultado.':'Deixe o sistema com a cara de cada cliente.'}</p></div><div className="headerActions"><button className="ghost">⌕ Pesquisar</button>{section==='services'&&<button className="primary" onClick={()=>setShowNew(true)}>+ Novo serviço</button>}</div></header>
+      <header><div><h1>{section==='services'?'Central de Serviços':section==='finance'?'Financeiro':'Personalização da Empresa'}</h1><p>{section==='services'?'Do primeiro atendimento à entrega, tudo no mesmo lugar.':section==='finance'?'Caixa, contas, recebimentos e resultado.':'Deixe o sistema com a cara de cada cliente.'} {section==='services'&&<small style={{marginLeft:8}}>Banco: {dbStatus==='online'?'● online':dbStatus==='offline'?'● offline':'conectando...'}</small>}</p></div><div className="headerActions"><button className="ghost">⌕ Pesquisar</button>{section==='services'&&<button className="primary" onClick={()=>setShowNew(true)}>+ Novo serviço</button>}</div></header>
 
       {section==='services' && <>
         <section className="metrics">
@@ -117,6 +131,6 @@ export default function Home(){
 
     {selected && section==='services' && <div className="drawerOverlay" onClick={()=>setSelected(null)}><aside className="drawer" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setSelected(null)}>×</button><span className="eyebrow">{selected.id}</span><h2>{selected.client}</h2><p className="subtitle">{selected.title}</p><div className="drawerValue">{money(selected.value)}<span>{selected.stage}</span></div><div className="timeline">{stages.map((st,i)=><div className={i<=stages.indexOf(selected.stage)?'done':''} key={st}><i></i><span>{st}</span></div>)}</div><div className="detailBlock"><h4>Resumo da OS</h4><div className="detailRow"><span>Entrega</span><b>{selected.due}</b></div><div className="detailRow"><span>Progresso</span><b>{selected.progress}%</b></div><div className="detailRow"><span>Responsável</span><b>Equipe Produção</b></div></div><div className="detailBlock"><h4>Próximas ações</h4><button className="action">✓ Checklist de produção</button><button className="action">▣ Materiais e estoque</button><button className="action">⌁ Arquivos e arte</button><button className="action">💬 Conversa com cliente</button></div><div className="drawerButtons"><button onClick={()=>moveStage(selected,-1)}>← Voltar etapa</button><button className="primary" onClick={()=>moveStage(selected,1)}>Avançar etapa →</button></div></aside></div>}
 
-    {showNew && <div className="modalOverlay" onClick={()=>setShowNew(false)}><div className="modal" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setShowNew(false)}>×</button><span className="eyebrow">NOVO SERVIÇO</span><h2>Comece pelo que o cliente pediu</h2><p>A OS seguirá do orçamento até a conclusão sem precisar ser recriada em outros módulos.</p><label>Cliente<input placeholder="Nome do cliente"/></label><label>Serviço<input placeholder="Ex.: Fachada ACM + letra caixa"/></label><div className="two"><label>Valor estimado<input placeholder="R$ 0,00"/></label><label>Prazo<input type="date"/></label></div><button className="primary wide" onClick={()=>setShowNew(false)}>Criar serviço</button></div></div>}
+    {showNew && <div className="modalOverlay" onClick={()=>setShowNew(false)}><div className="modal" onClick={e=>e.stopPropagation()}><button className="close" onClick={()=>setShowNew(false)}>×</button><span className="eyebrow">NOVO SERVIÇO</span><h2>Comece pelo que o cliente pediu</h2><p>A OS seguirá do orçamento até a conclusão sem precisar ser recriada em outros módulos.</p><label>Cliente<input value={newService.client} onChange={e=>setNewService({...newService,client:e.target.value})} placeholder="Nome do cliente"/></label><label>Serviço<input value={newService.title} onChange={e=>setNewService({...newService,title:e.target.value})} placeholder="Ex.: Fachada ACM + letra caixa"/></label><div className="two"><label>Valor estimado<input type="number" value={newService.total} onChange={e=>setNewService({...newService,total:e.target.value})} placeholder="0,00"/></label><label>Prazo<input type="date" value={newService.due} onChange={e=>setNewService({...newService,due:e.target.value})}/></label></div><button className="primary wide" onClick={createService}>Criar serviço</button></div></div>}
   </div>
 }

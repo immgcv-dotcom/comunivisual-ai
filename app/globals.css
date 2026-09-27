@@ -96,3 +96,8 @@ header{margin-bottom:28px}h1{font-size:28px;font-weight:750;letter-spacing:-.8px
 .stockLow{color:#b42318!important}.stockLow:after{content:"  • repor";font-size:8px;text-transform:uppercase;letter-spacing:.04em}
 .financeHero{box-shadow:0 8px 24px rgba(16,24,40,.05)}
 @media(max-width:760px){.moduleSummary{overflow:auto}.moduleSummary span{white-space:nowrap}}
+
+.stageWorkspace{border:1px solid #e4e7ec;border-radius:12px;padding:18px;margin-bottom:14px;background:linear-gradient(180deg,#fff,#fbfcfe)}
+.stageWorkspace h3{font-size:16px;line-height:1.3;margin:5px 0 6px;color:#101828}.stageWorkspace p{font-size:10px;line-height:1.55;color:#667085;margin:0}
+.stageKicker{font-size:8px;letter-spacing:.1em;font-weight:800;color:var(--primary)}
+.pendingFeature{display:flex;flex-direction:column;gap:4px;margin-top:14px;padding:12px;border:1px dashed #d0d5dd;border-radius:9px;background:#f9fafb}.pendingFeature b{font-size:10px;color:#344054}.pendingFeature span{font-size:9px;line-height:1.45;color:#667085}

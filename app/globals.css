@@ -23,3 +23,5 @@
 .marginAlert{display:grid;gap:4px;margin:12px 0;padding:11px 12px;border:1px solid #fedf89;background:#fffaeb;border-radius:9px;color:#93370d}.marginAlert b{font-size:10px}.marginAlert span{font-size:8px}.marginAlert strong{font-size:11px}
 
 .quoteCommercial{display:grid;gap:8px;margin:12px 0;padding:12px;border:1px solid #eaecf0;border-radius:10px}.quoteCommercial h4{margin:0}.quoteCommercial>div{display:grid;grid-template-columns:1fr 1fr;gap:7px}.quoteCommercial label{font-size:8px;color:#667085}.quoteCommercial input,.quoteCommercial textarea{display:block;width:100%;box-sizing:border-box;margin-top:3px;border:1px solid #d8dde6;border-radius:7px;padding:8px;background:#fff;font:inherit;resize:vertical}.quoteMsg{font-size:8px;color:#16835d}
+
+.whatsappAction{border-color:#b7e4c7!important;background:#f0fff4!important;color:#137a3d!important;font-weight:700}

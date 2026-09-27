@@ -42,7 +42,7 @@ const initialServices: Service[] = [
 const money = (v:number) => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 
 export default function Home(){
-  const [section,setSection]=useState<'services'|'clients'|'finance'|'brand'>('services')
+  const [section,setSection]=useState<'services'|'clients'|'finance'|'catalog'|'brand'>('services')
   const [filter,setFilter]=useState<'Todos'|Stage>('Todos')
   const [services,setServices]=useState(initialServices)
   const [selected,setSelected]=useState<Service|null>(initialServices[0])
@@ -72,10 +72,12 @@ export default function Home(){
   const [catalog,setCatalog]=useState<any[]>([])
   const [catalogPick,setCatalogPick]=useState('')
   const [measure,setMeasure]=useState({width:'',height:'',quantity:'1'})
+  const [catalogEdit,setCatalogEdit]=useState({id:'',basePrice:'0',productionHours:'0',installationHours:'0',machineHours:'0'})
 
   useEffect(()=>{(async()=>{try{const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok) throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:Math.round(((stages.indexOf(x.stage as Stage)+1)/stages.length)*100),color:'#3157ff',estimatedCost:Number(x.estimated_cost||0),actualCost:Number(x.actual_cost||0),estimatedMargin:Number(x.estimated_margin||0),minimumMargin:Number(x.minimum_margin||0),suggestedPrice:Number(x.suggested_price||0),quoteValidUntil:x.quote_valid_until||'',paymentTerms:x.payment_terms||'',quoteNotes:x.quote_notes||'',discount:Number(x.discount||0),productionHours:Number(x.production_hours||0),installationHours:Number(x.installation_hours||0),machineHours:Number(x.machine_hours||0),travelKm:Number(x.travel_km||0)})));setSelected(null)}}catch{setDbStatus('offline')}})()},[])
 
   async function loadCatalog(){const r=await fetch('/api/catalog',{cache:'no-store'});if(r.ok)setCatalog(await r.json())}
+  async function saveCatalogEdit(){if(!catalogEdit.id)return;const r=await fetch('/api/catalog',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(catalogEdit)});if(r.ok){await loadCatalog();setCatalogEdit({id:'',basePrice:'0',productionHours:'0',installationHours:'0',machineHours:'0'})}}
   async function loadPricing(){const r=await fetch('/api/pricing-settings',{cache:'no-store'});if(r.ok){const x=await r.json();setPricing({productionHourCost:String(x.production_hour_cost||0),installationHourCost:String(x.installation_hour_cost||0),machineHourCost:String(x.machine_hour_cost||0),travelKmCost:String(x.travel_km_cost||0),taxPercent:String(x.tax_percent||0),commissionPercent:String(x.commission_percent||0),wastePercent:String(x.waste_percent||0),minimumMarginPercent:String(x.minimum_margin_percent||0)})}}
   async function savePricing(){setPricingMsg('Salvando...');const r=await fetch('/api/pricing-settings',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(pricing)});setPricingMsg(r.ok?'Parâmetros salvos com sucesso.':'Erro ao salvar parâmetros.')}
   async function loadFinance(){const r=await fetch('/api/finance',{cache:'no-store'});if(r.ok)setFinanceEntries(await r.json())}
@@ -135,7 +137,7 @@ export default function Home(){
       <nav>
         <button className={section==='services'?'active':''} onClick={()=>setSection('services')}>▦ <span>Central de Serviços</span></button>
         <button className={section==='clients'?'active':''} onClick={()=>{setSection('clients');loadClients()}}>♙ <span>Clientes</span></button>
-        <button className={section==='finance'?'active':''} onClick={()=>{setSection('finance');loadFinance()}}>$ <span>Financeiro</span></button>
+        <button className={section==='finance'?'active':''} onClick={()=>{setSection('finance');loadFinance()}}>$ <span>Financeiro</span></button><button className={section==='catalog'?'active':''} onClick={()=>{setSection('catalog');loadCatalog()}}>▤ <span>Catálogo</span></button>
       </nav>
       <div className="sidebarBottom">
         <button className={section==='brand'?'active':''} onClick={()=>{setSection('brand');loadPricing()}}>⚙ <span>Personalização</span></button>
@@ -144,7 +146,7 @@ export default function Home(){
     </aside>
 
     <main>
-      <header><div><h1>{section==='services'?'Central de Serviços':section==='clients'?'Clientes':section==='finance'?'Financeiro':'Personalização da Empresa'}</h1><p>{section==='services'?'Do primeiro atendimento à entrega, tudo no mesmo lugar.':section==='clients'?'Cadastre empresas e use os dados diretamente nos orçamentos e OS.':section==='finance'?'Caixa, contas, recebimentos e resultado.':'Deixe o sistema com a cara de cada cliente.'} {section==='services'&&<small style={{marginLeft:8}}>Banco: {dbStatus==='online'?'● online':dbStatus==='offline'?'● offline':'conectando...'}</small>}</p></div><div className="headerActions"><button className="ghost">⌕ Pesquisar</button>{section==='services'&&<button className="primary" onClick={()=>setShowNew(true)}>+ Novo serviço</button>}</div></header>
+      <header><div><h1>{section==='services'?'Central de Serviços':section==='clients'?'Clientes':section==='finance'?'Financeiro':section==='catalog'?'Catálogo de Serviços':'Personalização da Empresa'}</h1><p>{section==='services'?'Do primeiro atendimento à entrega, tudo no mesmo lugar.':section==='clients'?'Cadastre empresas e use os dados diretamente nos orçamentos e OS.':section==='finance'?'Caixa, contas, recebimentos e resultado.':'Deixe o sistema com a cara de cada cliente.'} {section==='services'&&<small style={{marginLeft:8}}>Banco: {dbStatus==='online'?'● online':dbStatus==='offline'?'● offline':'conectando...'}</small>}</p></div><div className="headerActions"><button className="ghost">⌕ Pesquisar</button>{section==='services'&&<button className="primary" onClick={()=>setShowNew(true)}>+ Novo serviço</button>}</div></header>
 
       {section==='services' && <>
         <section className="metrics">
@@ -170,6 +172,8 @@ export default function Home(){
           {!boardServices.some(x=>x.stage===stage)&&<div className="emptyStage">Arraste uma OS para cá</div>}</div>
         </div>)}</section>
       </>}
+
+      {section==='catalog' && <section className="catalogPage"><div className="panel"><div className="panelTitle"><div><h3>Catálogo de serviços</h3><p>Configure preço-base e tempos padrão usados automaticamente nos orçamentos.</p></div></div><div className="catalogTable">{catalog.map((x:any)=><button key={x.id} className="catalogRow" onClick={()=>setCatalogEdit({id:x.id,basePrice:String(x.base_price||0),productionHours:String(x.production_hours_per_unit||0),installationHours:String(x.installation_hours_per_unit||0),machineHours:String(x.machine_hours_per_unit||0)})}><span><b>{x.name}</b><small>{x.category} · {x.unit}</small></span><strong>{money(Number(x.base_price||0))}</strong></button>)}</div></div>{catalogEdit.id&&<div className="panel catalogEditor"><h3>Configurar serviço</h3><label>Preço-base<input type="number" min="0" step="0.01" value={catalogEdit.basePrice} onChange={e=>setCatalogEdit({...catalogEdit,basePrice:e.target.value})}/></label><label>Horas de produção por unidade<input type="number" min="0" step="0.1" value={catalogEdit.productionHours} onChange={e=>setCatalogEdit({...catalogEdit,productionHours:e.target.value})}/></label><label>Horas de instalação por unidade<input type="number" min="0" step="0.1" value={catalogEdit.installationHours} onChange={e=>setCatalogEdit({...catalogEdit,installationHours:e.target.value})}/></label><label>Horas de máquina por unidade<input type="number" min="0" step="0.1" value={catalogEdit.machineHours} onChange={e=>setCatalogEdit({...catalogEdit,machineHours:e.target.value})}/></label><button className="primary wide" onClick={saveCatalogEdit}>Salvar ficha técnica</button></div>}</section>}
 
       {section==='clients' && <section className="clientPage">
         <div className="panel clientEditor"><div className="panelTitle"><div><h3>Novo cliente</h3><p>Digite o CNPJ para preencher os dados disponíveis automaticamente.</p></div></div>

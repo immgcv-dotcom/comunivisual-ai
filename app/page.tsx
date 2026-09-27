@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-type Stage = 'Atendimento' | 'Orçamento' | 'Aprovado' | 'Arte' | 'Produção' | 'Instalação' | 'Concluído'
+type Stage = 'Atendimento' | 'Orçamento' | 'Aprovado' | 'Arte' | 'Produção' | 'Instalação' | 'Concluído' | 'Cancelado'
+type BoardStage = Exclude<Stage,'Cancelado'>
 type Service = {
   id: string
   dbId?: string
@@ -28,7 +29,7 @@ type Service = {
   travelKm?: number
 }
 
-const stages: Stage[] = ['Atendimento', 'Orçamento', 'Aprovado', 'Arte', 'Produção', 'Instalação', 'Concluído']
+const stages: BoardStage[] = ['Atendimento', 'Orçamento', 'Aprovado', 'Arte', 'Produção', 'Instalação', 'Concluído']
 
 const initialServices: Service[] = [
   { id:'OS-1254', client:'Mercado São Lucas', title:'Fachada ACM + letras caixa', value:4950, stage:'Produção', due:'04/10', progress:68, color:'#2f6fed' },
@@ -118,7 +119,7 @@ export default function Home(){
 
   const filtered=useMemo(()=> filter==='Todos'?services:services.filter(s=>s.stage===filter),[filter,services])
   const boardServices=filter==='Todos'?services:filtered
-  const totalOpen=services.filter(s=>s.stage!=='Concluído').reduce((a,b)=>a+b.value,0)
+  const totalOpen=services.filter(s=>!['Concluído','Cancelado'].includes(s.stage)).reduce((a,b)=>a+b.value,0)
   const totalDone=services.filter(s=>s.stage==='Concluído').reduce((a,b)=>a+b.value,0)
 
   async function setStage(s:Service,next:Stage){
@@ -177,7 +178,7 @@ export default function Home(){
 
       {section==='services' && <>
         <section className="metrics">
-          <div className="metric"><span>Serviços em andamento</span><b>{services.filter(s=>!['Concluído'].includes(s.stage)).length}</b><small>operação ativa</small></div>
+          <div className="metric"><span>Serviços em andamento</span><b>{services.filter(s=>!['Concluído','Cancelado'].includes(s.stage)).length}</b><small>operação ativa</small></div>
           <div className="metric"><span>Em produção</span><b>{services.filter(s=>s.stage==='Produção').length}</b><small>na fábrica agora</small></div>
           <div className="metric"><span>Valor em aberto</span><b>{money(totalOpen)}</b><small>orçamentos + pedidos</small></div>
           <div className="metric"><span>Concluído recente</span><b>{money(totalDone)}</b><small>serviços finalizados</small></div>
@@ -185,7 +186,7 @@ export default function Home(){
 
         <section className="aiBox"><div className="aiIcon">✦</div><div className="aiContent"><b>Assistente IA</b><span>Descreva o serviço e deixe a IA preparar orçamento, materiais e produção.</span><div className="aiRow"><input value={aiText} onChange={e=>setAiText(e.target.value)} placeholder='Ex.: fachada de ACM preta 5,80 x 1,10 com letras em PVC e instalação'/><button onClick={runAI}>Gerar</button></div>{aiResult&&<div className="aiResult">{aiResult}</div>}</div></section>
 
-        <div className="filters"><button className={filter==='Todos'?'selected':''} onClick={()=>setFilter('Todos')}>Todos <em>{services.length}</em></button>{stages.map(s=><button key={s} className={filter===s?'selected':''} onClick={()=>setFilter(s)}>{s} <em>{services.filter(x=>x.stage===s).length}</em></button>)}</div>
+        <div className="filters"><button className={filter==='Todos'?'selected':''} onClick={()=>setFilter('Todos')}>Todos <em>{services.length}</em></button>{stages.map(s=><button key={s} className={filter===s?'selected':''} onClick={()=>setFilter(s)}>{s} <em>{services.filter(x=>x.stage===s).length}</em></button>)}<button className={filter==='Cancelado'?'selected':''} onClick={()=>setFilter('Cancelado')}>Cancelados <em>{services.filter(x=>x.stage==='Cancelado').length}</em></button></div>
 
         <section className="kanbanBoard">{stages.map(stage=><div className="kanbanColumn" key={stage} onDragOver={e=>e.preventDefault()} onDrop={async e=>{e.preventDefault();const id=e.dataTransfer.getData('text/plain');const item=services.find(x=>x.id===id);setDragging(null);if(item) await setStage(item,stage)}}>
           <div className="kanbanHead"><div><b>{stage}</b><span>{boardServices.filter(x=>x.stage===stage).length}</span></div><small>{money(boardServices.filter(x=>x.stage===stage).reduce((a,b)=>a+b.value,0))}</small></div>

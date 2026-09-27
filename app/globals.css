@@ -90,3 +90,9 @@ header{margin-bottom:28px}h1{font-size:28px;font-weight:750;letter-spacing:-.8px
 .kanbanCard .progress{height:4px;margin:12px 0 9px}.dragHandle{opacity:.35;font-size:13px;letter-spacing:-2px}.kanbanCard:hover .dragHandle{opacity:.8}
 .emptyStage{border:1px dashed #d0d5dd;background:rgba(255,255,255,.45);border-radius:9px;padding:22px 10px;text-align:center;color:#98a2b3;font-size:9px}
 @media(max-width:760px){.globalSearch{width:100%;order:2}.headerActions{flex-wrap:wrap}.headerActions .primary{margin-left:auto}.kanbanBoard{grid-template-columns:repeat(7,82vw)}}
+
+.moduleSummary{display:flex;gap:8px;margin:-4px 0 14px}.moduleSummary span{display:flex;align-items:baseline;gap:5px;padding:8px 11px;border:1px solid #e4e7ec;background:#fff;border-radius:8px;color:#667085;font-size:10px}.moduleSummary b{font-size:13px;color:#344054}
+.stockRow,.catalogRow,.clientRowButton{transition:background .12s ease,border-color .12s ease,transform .12s ease}.stockRow:hover,.catalogRow:hover,.clientRowButton:hover{background:#f9fafb;transform:translateY(-1px)}
+.stockLow{color:#b42318!important}.stockLow:after{content:"  • repor";font-size:8px;text-transform:uppercase;letter-spacing:.04em}
+.financeHero{box-shadow:0 8px 24px rgba(16,24,40,.05)}
+@media(max-width:760px){.moduleSummary{overflow:auto}.moduleSummary span{white-space:nowrap}}

@@ -146,7 +146,8 @@ export default function Home(){
   async function removeQuoteItem(id:string){if(!selected)return;const r=await fetch('/api/quote-items',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});if(!r.ok){const x=await r.json().catch(()=>({}));setQuoteMsg(x.error||'Não foi possível excluir o item.');return}if(r.ok){await loadQuoteItems(selected);const sr=await fetch('/api/services',{cache:'no-store'});if(sr.ok){const rows=await sr.json();const row=rows.find((x:any)=>x.id===selected.dbId);if(row){const value=Number(row.total);setServices(p=>p.map(x=>x.dbId===selected.dbId?{...x,value}:x));setSelected({...selected,value})}}}}
 
   async function moveStage(s:Service,dir:number){
-    const idx=stages.indexOf(s.stage)
+    const idx=stages.indexOf(s.stage as BoardStage)
+    if(idx<0)return
     const next=stages[Math.max(0,Math.min(stages.length-1,idx+dir))]
     await setStage(s,next)
   }

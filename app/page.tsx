@@ -118,7 +118,7 @@ export default function Home(){
   }
 
   const filtered=useMemo(()=> filter==='Todos'?services:services.filter(s=>s.stage===filter),[filter,services])
-  const boardServices=filter==='Todos'?services:filtered
+  const boardServices=filter==='Todos'?services.filter(s=>s.stage!=='Cancelado'):filtered
   const totalOpen=services.filter(s=>!['Concluído','Cancelado'].includes(s.stage)).reduce((a,b)=>a+b.value,0)
   const totalDone=services.filter(s=>s.stage==='Concluído').reduce((a,b)=>a+b.value,0)
 

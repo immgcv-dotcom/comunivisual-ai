@@ -71,3 +71,14 @@ header{margin-bottom:28px}h1{font-size:28px;font-weight:750;letter-spacing:-.8px
 .osTabs button{flex:1;border:0;background:transparent;color:#667085;border-radius:7px;padding:9px 8px;font-size:10px;font-weight:750;cursor:pointer}
 .osTabs button:hover{color:#344054}.osTabs button.active{background:#fff;color:#101828;box-shadow:0 1px 3px rgba(16,24,40,.1)}
 @media(max-width:760px){.osTabs{top:-24px;overflow:auto}.osTabs button{min-width:90px}}
+
+/* OS workspace */
+.osTabs+ .marginAlert,.osTabs~.quoteCommercial,.osTabs~.costInputs,.osTabs~.resultBox,.osTabs~.detailBlock{animation:panelIn .16s ease-out}
+@keyframes panelIn{from{opacity:.35;transform:translateY(3px)}to{opacity:1;transform:none}}
+.resultBox{border:1px solid #e4e7ec;background:#fff;border-radius:12px;overflow:hidden}
+.resultBox>div{padding:14px 15px}
+.detailRow{padding:9px 0;border-bottom:1px solid #f2f4f7}.detailRow:last-child{border:0}
+.quoteCommercial,.costInputs{background:#fff;border:1px solid #e4e7ec;border-radius:12px;padding:18px;margin-bottom:14px}
+.quoteCommercial h4,.costInputs h4{margin:0 0 14px}
+.quoteCommercial input,.quoteCommercial textarea,.costInputs input,.quoteForm input,.quoteForm select,.catalogQuick select,.materialAdd select,.materialAdd input{border:1px solid #d0d5dd;border-radius:8px;background:#fff;outline:none}
+.quoteCommercial input:focus,.quoteCommercial textarea:focus,.costInputs input:focus,.quoteForm input:focus,.quoteForm select:focus,.catalogQuick select:focus,.materialAdd select:focus,.materialAdd input:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 10%,transparent)}

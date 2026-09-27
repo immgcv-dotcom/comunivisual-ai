@@ -89,6 +89,7 @@ export default function Home(){
   const [catalogMaterials,setCatalogMaterials]=useState<any[]>([])
   const [catalogMaterialForm,setCatalogMaterialForm]=useState({materialId:'',consumptionPerUnit:'1',wastePercent:'0'})
   const [osTab,setOsTab]=useState<'summary'|'quote'|'production'|'materials'>('summary')
+  const [serviceSearch,setServiceSearch]=useState('')
 
   useEffect(()=>{(async()=>{try{const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok) throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:x.stage==='Cancelado'?0:Math.max(0,Math.round(((stages.indexOf(x.stage as BoardStage)+1)/stages.length)*100)),color:'#3157ff',estimatedCost:Number(x.estimated_cost||0),actualCost:Number(x.actual_cost||0),estimatedMargin:Number(x.estimated_margin||0),minimumMargin:Number(x.minimum_margin||0),suggestedPrice:Number(x.suggested_price||0),quoteValidUntil:x.quote_valid_until||'',paymentTerms:x.payment_terms||'',quoteNotes:x.quote_notes||'',discount:Number(x.discount||0),productionHours:Number(x.production_hours||0),installationHours:Number(x.installation_hours||0),machineHours:Number(x.machine_hours||0),travelKm:Number(x.travel_km||0)})));setSelected(null)}}catch{setDbStatus('offline')}})()},[])
 
@@ -119,7 +120,8 @@ export default function Home(){
   }
 
   const filtered=useMemo(()=> filter==='Todos'?services:services.filter(s=>s.stage===filter),[filter,services])
-  const boardServices=filter==='Todos'?services.filter(s=>s.stage!=='Cancelado'):filtered
+  const searchedServices=filtered.filter(s=>!serviceSearch.trim()||[s.id,s.client,s.title,s.stage].some(v=>String(v).toLowerCase().includes(serviceSearch.toLowerCase().trim())))
+  const boardServices=filter==='Todos'?services.filter(s=>s.stage!=='Cancelado'&&(!serviceSearch.trim()||[s.id,s.client,s.title,s.stage].some(v=>String(v).toLowerCase().includes(serviceSearch.toLowerCase().trim())))):searchedServices
   const totalOpen=services.filter(s=>!['Concluído','Cancelado'].includes(s.stage)).reduce((a,b)=>a+b.value,0)
   const totalDone=services.filter(s=>s.stage==='Concluído').reduce((a,b)=>a+b.value,0)
 
@@ -177,7 +179,7 @@ export default function Home(){
     </aside>
 
     <main>
-      <header><div><h1>{section==='services'?'Central de Serviços':section==='clients'?'Clientes':section==='finance'?'Financeiro':section==='catalog'?'Catálogo de Serviços':section==='stock'?'Estoque':'Personalização da Empresa'}</h1><p>{section==='services'?'Do primeiro atendimento à entrega, tudo no mesmo lugar.':section==='clients'?'Cadastre empresas e use os dados diretamente nos orçamentos e OS.':section==='finance'?'Caixa, contas, recebimentos e resultado.':'Deixe o sistema com a cara de cada cliente.'} {section==='services'&&<small style={{marginLeft:8}}>Banco: {dbStatus==='online'?'● online':dbStatus==='offline'?'● offline':'conectando...'}</small>}</p></div><div className="headerActions"><button className="ghost">⌕ Pesquisar</button>{section==='services'&&<button className="primary" onClick={()=>setShowNew(true)}>+ Novo serviço</button>}</div></header>
+      <header><div><h1>{section==='services'?'Central de Serviços':section==='clients'?'Clientes':section==='finance'?'Financeiro':section==='catalog'?'Catálogo de Serviços':section==='stock'?'Estoque':'Personalização da Empresa'}</h1><p>{section==='services'?'Do primeiro atendimento à entrega, tudo no mesmo lugar.':section==='clients'?'Cadastre empresas e use os dados diretamente nos orçamentos e OS.':section==='finance'?'Caixa, contas, recebimentos e resultado.':'Deixe o sistema com a cara de cada cliente.'} {section==='services'&&<small style={{marginLeft:8}}>Banco: {dbStatus==='online'?'● online':dbStatus==='offline'?'● offline':'conectando...'}</small>}</p></div><div className="headerActions">{section==='services'&&<div className="globalSearch"><span>⌕</span><input value={serviceSearch} onChange={e=>setServiceSearch(e.target.value)} placeholder="Buscar OS, cliente ou serviço"/></div>}{section==='services'&&<button className="primary" onClick={()=>setShowNew(true)}>+ Novo serviço</button>}</div></header>
 
       {section==='services' && <>
         <section className="metrics">
@@ -198,7 +200,7 @@ export default function Home(){
             <h3>{s.client}</h3><p>{s.title}</p>
             <div className="cardMeta"><span>Entrega <b>{s.due}</b></span><strong>{money(s.value)}</strong></div>
             <div className="progress"><i style={{width:`${s.progress}%`,background:s.color}}/></div>
-            <div className="cardFoot"><span>{s.progress}%</span><span>Detalhes →</span></div>
+            <div className="cardSignals"><span>{s.stage==='Orçamento'?'Aguardando aprovação':s.stage==='Arte'?'Arte em andamento':s.stage==='Produção'?'Em fabricação':s.stage==='Instalação'?'Pronto para campo':s.stage==='Concluído'?'Finalizado':s.stage==='Aprovado'?'Pedido aprovado':'Novo atendimento'}</span></div><div className="cardFoot"><span>{s.progress}% do fluxo</span><span>Abrir OS →</span></div>
           </article>)}
           {!boardServices.some(x=>x.stage===stage)&&<div className="emptyStage">Arraste uma OS para cá</div>}</div>
         </div>)}</section>}

@@ -7,6 +7,16 @@ export async function ensureDb(){
  await sql`alter table companies add column if not exists whatsapp text`
  await sql`alter table companies add column if not exists email text`
  await sql`alter table companies add column if not exists logo_url text`
+ await sql`alter table companies add column if not exists legal_name text`
+ await sql`alter table companies add column if not exists trade_name text`
+ await sql`alter table companies add column if not exists state_registration text`
+ await sql`alter table companies add column if not exists postal_code text`
+ await sql`alter table companies add column if not exists street text`
+ await sql`alter table companies add column if not exists address_number text`
+ await sql`alter table companies add column if not exists complement text`
+ await sql`alter table companies add column if not exists district text`
+ await sql`alter table companies add column if not exists city text`
+ await sql`alter table companies add column if not exists state text`
  await sql`create table if not exists clients (id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade, name text not null, phone text, whatsapp text, email text, created_at timestamptz not null default now())`
  await sql`alter table clients add column if not exists person_type text not null default 'PJ'`
  await sql`alter table clients add column if not exists document text`

@@ -1,0 +1,5 @@
+import { NextResponse } from 'next/server'
+import { getDb } from '@/lib/db'
+import { ensureDb } from '@/lib/bootstrap'
+export const dynamic='force-dynamic'
+export async function PATCH(req:Request){try{const companyId=await ensureDb();const sql=getDb();const b=await req.json();const name=String(b.name||'').trim();if(!name)return NextResponse.json({error:'Nome obrigatório'},{status:400});const primary=/^#[0-9a-f]{6}$/i.test(String(b.primary||''))?String(b.primary):'#3157ff';const accent=/^#[0-9a-f]{6}$/i.test(String(b.accent||''))?String(b.accent):'#16c79a';const rows=await sql`update companies set name=${name},document=${String(b.document||'').trim()||null},phone=${String(b.phone||'').trim()||null},whatsapp=${String(b.whatsapp||'').trim()||null},email=${String(b.email||'').trim()||null},logo_url=${String(b.logoUrl||'').trim()||null},primary_color=${primary},accent_color=${accent} where id=${companyId} returning id,name,primary_color,accent_color`;return NextResponse.json(rows[0])}catch{return NextResponse.json({error:'Erro ao salvar empresa'},{status:500})}}

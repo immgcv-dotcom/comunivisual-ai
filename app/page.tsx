@@ -257,6 +257,8 @@ export default function Home(){
         {can('clients')&&<button className={section==='clients'?'active':''} onClick={()=>{setSection('clients');loadClients()}}><i className="navIcon">♙</i><span>Clientes</span></button>}
         {can('finance')&&<button className={section==='finance'?'active':''} onClick={()=>{setSection('finance');loadFinance()}}><i className="navIcon">◉</i><span>Financeiro</span></button>}
         {can('stock')&&<button className={section==='stock'?'active':''} onClick={()=>{setSection('stock');loadMaterials()}}><i className="navIcon">▤</i><span>Estoque</span></button>}
+        {can('settings')&&<button className={'mobileNavOnly '+(section==='brand'?'active':'')} onClick={()=>{setSection('brand');loadCompany()}}><i className="navIcon">⚙</i><span>Config.</span></button>}
+        <button className="mobileNavOnly mobileLogout" onClick={logout}><i className="navIcon">↪</i><span>Sair</span></button>
       </nav>
       <div className="sidebarBottom">
         <div className="sidebarAdminLabel">ADMINISTRAÇÃO</div>

@@ -939,3 +939,225 @@ body{background:var(--app-bg)!important;color:var(--app-ink)!important}
   .ordersToolbar{display:grid!important;gap:8px!important}.ordersToolbar .filters{overflow:auto!important}.ordersToolbar .viewSwitch{justify-self:start!important}
   .stageOnlyActions{width:100%!important;display:grid!important}.stageOnlyActions>*{width:100%!important}
 }
+
+
+/* =========================================================
+   MOBILE FINAL — navegação e telas realmente responsivas
+   ========================================================= */
+.mobileNavOnly{display:none!important}
+
+@media(max-width:760px){
+  html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+  body{padding:0!important}
+  .app{display:block!important;width:100%!important;min-width:0!important;min-height:100dvh!important}
+
+  /* navegação vira barra inferior de aplicativo */
+  .sidebar.sidebarLabeled{
+    position:fixed!important;
+    z-index:120!important;
+    left:0!important;right:0!important;top:auto!important;bottom:0!important;
+    width:100%!important;min-width:0!important;height:auto!important;min-height:0!important;
+    padding:7px 7px calc(7px + env(safe-area-inset-bottom))!important;
+    border:0!important;border-top:1px solid rgba(255,255,255,.08)!important;
+    background:rgba(12,20,36,.97)!important;
+    box-shadow:0 -10px 34px rgba(15,23,42,.20)!important;
+    backdrop-filter:blur(18px)!important;
+    overflow-x:auto!important;overflow-y:hidden!important;
+  }
+  .sidebarLabeled .brandBlock,.sidebarLabeled .sidebarBottom{display:none!important}
+  .sidebarLabeled nav{
+    display:flex!important;flex-direction:row!important;align-items:stretch!important;
+    gap:4px!important;width:max-content!important;min-width:100%!important;padding:0!important;margin:0!important
+  }
+  .sidebarLabeled nav button,.sidebarLabeled nav .sideLink{
+    display:flex!important;flex:1 0 67px!important;min-width:67px!important;max-width:none!important;
+    min-height:54px!important;padding:5px 7px!important;margin:0!important;
+    flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;
+    border-radius:10px!important;font-size:9px!important;line-height:1.1!important;text-align:center!important;
+    color:#95a2b6!important
+  }
+  .sidebarLabeled nav button.active{
+    background:rgba(98,111,255,.20)!important;color:#fff!important;box-shadow:none!important
+  }
+  .sidebarLabeled nav .navIcon{width:auto!important;height:auto!important;font-size:15px!important;line-height:1!important}
+  .sidebarLabeled nav button span{display:block!important;max-width:68px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  .mobileNavOnly{display:flex!important}
+  .mobileLogout{color:#c5cedb!important}
+
+  /* área de conteúdo */
+  .mainArea{
+    width:100%!important;max-width:100%!important;min-width:0!important;
+    margin:0!important;padding:17px 12px calc(94px + env(safe-area-inset-bottom))!important;
+    overflow:visible!important;box-sizing:border-box!important
+  }
+  .appHeader{
+    display:flex!important;flex-direction:column!important;align-items:stretch!important;
+    gap:13px!important;min-height:0!important;margin:0 0 17px!important
+  }
+  .headerCopy{min-width:0!important}
+  .pageEyebrow{font-size:8px!important}
+  .appHeader h1{font-size:24px!important;line-height:1.08!important;margin:4px 0 6px!important;overflow-wrap:anywhere!important}
+  .appHeader p{font-size:12px!important;line-height:1.45!important;max-width:none!important}
+  .headerActions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;width:100%!important;margin:0!important}
+  .headerActions>*{min-width:0!important;width:100%!important;max-width:none!important}
+  .headerActions .globalSearch{order:0!important;width:100%!important;min-width:0!important}
+  .headerActions .primary,.headerGhost{width:100%!important;min-height:44px!important}
+
+  /* início */
+  .simpleHome{gap:12px!important}
+  .homeHeroPremium{
+    display:grid!important;grid-template-columns:1fr!important;gap:22px!important;
+    min-height:0!important;padding:25px 19px!important;border-radius:18px!important
+  }
+  .homeHeroPremium:after{display:none!important}
+  .homeHeroCopy{max-width:none!important}
+  .homeHeroCopy h2{font-size:29px!important;line-height:1.03!important;margin:9px 0 12px!important}
+  .homeHeroCopy h2 br{display:none!important}
+  .homeHeroCopy p{font-size:12px!important;line-height:1.55!important}
+  .homeHeroActions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;margin-top:20px!important}
+  .homeMainCta,.homeGhostCta{width:100%!important;min-height:46px!important}
+  .homeFlowPreview{display:grid!important;grid-template-columns:1fr!important;gap:7px!important}
+  .homeFlowStep{min-width:0!important;padding:11px 12px!important}
+  .homeFlowStep>div{min-width:0!important}
+  .homeFlowStep b,.homeFlowStep em{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+
+  .homeNumbers{grid-template-columns:1fr 1fr!important;gap:8px!important}
+  .homeNumbers button{min-height:112px!important;padding:16px!important;overflow:hidden!important}
+  .homeNumbers b{font-size:18px!important;white-space:normal!important;overflow-wrap:anywhere!important}
+  .homeNumbers span{font-size:9px!important}.homeNumbers small{font-size:9px!important}
+  .homeNumbers i{right:13px!important;top:13px!important}
+
+  .homeWorkspace{grid-template-columns:1fr!important;gap:10px!important}
+  .premiumPanelTitle{padding:16px!important;gap:10px!important}
+  .premiumPanelTitle h3{font-size:14px!important}
+  .homeRecentList>button{
+    grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important;
+    padding:12px 14px!important;min-height:66px!important
+  }
+  .homeRecentList>button>div{min-width:0!important}
+  .homeRecentList strong,.homeRecentList i{display:none!important}
+  .homeStage{max-width:92px!important}
+  .homeActionCard{grid-template-columns:38px minmax(0,1fr) auto!important;padding:13px!important;min-width:0!important}
+  .homeActionCard div{min-width:0!important}.homeActionCard small{overflow-wrap:anywhere!important}
+
+  /* pedidos */
+  .ordersPage{gap:11px!important}
+  .ordersIntro{
+    display:grid!important;grid-template-columns:1fr!important;align-items:start!important;
+    gap:15px!important;padding:18px!important;border-radius:15px!important
+  }
+  .ordersIntro h2{font-size:18px!important;line-height:1.18!important}
+  .ordersIntro p{font-size:11px!important;line-height:1.5!important}
+  .ordersNewButton{width:100%!important}
+
+  .ordersToolbar{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;min-width:0!important}
+  .ordersToolbar .filters{
+    display:flex!important;width:100%!important;max-width:100%!important;overflow-x:auto!important;
+    gap:6px!important;padding:1px 0 5px!important;scrollbar-width:none!important
+  }
+  .ordersToolbar .filters::-webkit-scrollbar{display:none!important}
+  .ordersToolbar .filters button{flex:0 0 auto!important;min-height:38px!important}
+  .ordersToolbar .viewSwitch{display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important;margin:0!important}
+  .ordersToolbar .viewSwitch button{width:100%!important}
+
+  .ordersBoard,.kanbanBoard{
+    display:grid!important;grid-template-columns:1fr!important;
+    width:100%!important;max-width:100%!important;min-width:0!important;
+    gap:10px!important;overflow:visible!important;padding:0!important
+  }
+  .ordersBoard .kanbanColumn,.kanbanColumn{
+    width:100%!important;min-width:0!important;max-width:100%!important;
+    min-height:0!important;padding:9px!important;border-radius:14px!important
+  }
+  .ordersBoard .kanbanList,.kanbanList{min-width:0!important}
+  .ordersBoard .kanbanCard,.kanbanCard{width:100%!important;min-width:0!important;box-sizing:border-box!important}
+  .ordersBoard .kanbanCard h3,.ordersBoard .kanbanCard p{overflow-wrap:anywhere!important}
+  .orderCardInfo{grid-template-columns:1fr 1fr!important}
+  .cardTop{gap:8px!important}.cardTopActions{flex:0 0 auto!important}
+  .cardEditBtn{min-height:32px!important;padding:0 9px!important}
+
+  /* lista de pedidos */
+  .ordersList{padding:13px!important;overflow:hidden!important}
+  .serviceListHead{display:none!important}
+  .serviceListRow{grid-template-columns:1fr!important;gap:8px!important;padding:12px 0!important}
+  .serviceListMain{
+    grid-template-columns:1fr 1fr!important;gap:8px 12px!important;
+    width:100%!important;min-width:0!important
+  }
+  .serviceListMain>*{min-width:0!important;overflow-wrap:anywhere!important}
+  .serviceListActions{justify-content:stretch!important}.serviceListActions button{width:100%!important}
+
+  /* drawer da OS ocupa a tela, sem sair para fora */
+  .drawerOverlay{position:fixed!important;inset:0!important;overflow:hidden!important}
+  .drawer.stageOnlyDrawer{
+    position:absolute!important;inset:0!important;width:100%!important;max-width:100%!important;height:100dvh!important;
+    padding:20px 14px calc(22px + env(safe-area-inset-bottom))!important;
+    border-radius:0!important;overflow-y:auto!important;box-sizing:border-box!important
+  }
+  .stageOnlyDrawer .close{position:fixed!important;right:12px!important;top:12px!important;z-index:4!important}
+  .stageOnlyHead{display:grid!important;grid-template-columns:1fr!important;gap:11px!important;padding:4px 42px 14px 2px!important}
+  .stageOnlyHead h2{font-size:21px!important;overflow-wrap:anywhere!important}
+  .stageOnlyHead p{font-size:12px!important;overflow-wrap:anywhere!important}
+  .editOrderBtn{width:100%!important;grid-column:1/-1!important}
+  .orderEditPanel{padding:13px!important}.orderEditPanel>div:not(.orderEditActions){grid-template-columns:1fr!important}
+  .stageOnlyFlow{gap:8px!important}
+  .stageOnlyCard{
+    grid-template-columns:38px minmax(0,1fr)!important;gap:10px!important;
+    width:100%!important;min-width:0!important;min-height:0!important;padding:13px!important
+  }
+  .stageOnlyNumber{width:36px!important;height:36px!important}
+  .stageOnlyText{min-width:0!important}.stageOnlyText>small{max-width:none!important}
+  .stageOnlyCard>.primary,.stageOnlyActions,.stageDoneLabel{grid-column:1/-1!important;width:100%!important}
+  .stageOnlyActions{display:grid!important;grid-template-columns:1fr!important;justify-content:stretch!important}
+  .stageOnlyActions>*{width:100%!important;max-width:100%!important;white-space:normal!important}
+
+  /* modais viram bottom-sheet legível */
+  .modalOverlay{align-items:end!important;padding:8px!important;box-sizing:border-box!important;overflow:hidden!important}
+  .modal{
+    width:100%!important;max-width:100%!important;max-height:94dvh!important;
+    margin:0!important;padding:22px 16px calc(18px + env(safe-area-inset-bottom))!important;
+    border-radius:18px 18px 12px 12px!important;overflow-y:auto!important;box-sizing:border-box!important
+  }
+  .modal h2{font-size:22px!important}.modal>p{font-size:12px!important}
+  .modal .two{grid-template-columns:1fr!important;gap:0!important}
+  .modal input,.modal select,.modal textarea{width:100%!important;max-width:100%!important;box-sizing:border-box!important;font-size:16px!important}
+
+  /* clientes */
+  .clientsPage,.clientPage,.stockPage,.brandPage,.catalogPage{grid-template-columns:1fr!important;width:100%!important;min-width:0!important;gap:12px!important}
+  .clientEditor,.stockEditor,.catalogEditor{position:static!important;width:100%!important;min-width:0!important;box-sizing:border-box!important}
+  .clientGrid,.companyFiscalGrid,.pricingGrid{grid-template-columns:1fr!important}
+  .clientRow,.clientRowButton,.stockRow,.catalogRow{width:100%!important;min-width:0!important;box-sizing:border-box!important}
+  .clientRowButton{display:grid!important;grid-template-columns:1fr!important;gap:7px!important}
+
+  /* financeiro */
+  .financePage{width:100%!important;min-width:0!important;gap:11px!important}
+  .financeHero{
+    display:grid!important;grid-template-columns:1fr!important;gap:18px!important;
+    padding:20px!important;border-radius:16px!important;min-width:0!important
+  }
+  .financeHero h2{font-size:27px!important;overflow-wrap:anywhere!important}
+  .financeHeroRight{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+  .financeHeroRight b{font-size:15px!important}
+  .moduleSummary{overflow-x:auto!important;max-width:100%!important;padding-bottom:4px!important}
+  .financeCards{grid-template-columns:1fr 1fr!important;gap:8px!important}
+  .financeCards>div{min-width:0!important;padding:15px!important}.financeCards b{font-size:16px!important;overflow-wrap:anywhere!important}
+  .financeNew{padding:15px!important}.financeNewGrid{grid-template-columns:1fr!important}
+  .financeTransaction{grid-template-columns:32px minmax(0,1fr)!important;gap:8px 10px!important}
+  .financeTransaction .txDescription{min-width:0!important}
+  .financeTransaction .txDescription span{overflow-wrap:anywhere!important}
+  .financeTransaction>strong,.financeTransaction .financeDue{grid-column:2!important;text-align:left!important}
+  .financeTransactionActions{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr!important;gap:7px!important}
+  .financeTransactionActions .paymentMethodSelect,.financeTransactionActions .financeStatus,.financeTransactionActions .financeDelete{width:100%!important;max-width:none!important;min-width:0!important}
+
+  /* estoque e configuração */
+  .stockPage .panel,.brandPage .panel,.section-brand .panel{min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+  .stockPurchaseBox,.invoicePaymentBox{grid-template-columns:1fr!important}
+  .colorFields{grid-template-columns:1fr!important}
+}
+
+@media(max-width:390px){
+  .homeNumbers{grid-template-columns:1fr!important}
+  .homeHeroCopy h2{font-size:26px!important}
+  .financeCards,.financeHeroRight{grid-template-columns:1fr!important}
+  .sidebarLabeled nav button,.sidebarLabeled nav .sideLink{flex-basis:64px!important;min-width:64px!important}
+}

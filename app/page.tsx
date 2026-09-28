@@ -209,14 +209,23 @@ export default function Home(){
       {section==='services'&&<small style={{marginLeft:8}}>Banco: {dbStatus==='online'?'● online':dbStatus==='offline'?'● offline':'conectando...'}</small>}</p></div><div className="headerActions">{section==='services'&&<div className="globalSearch"><span>⌕</span><input value={serviceSearch} onChange={e=>setServiceSearch(e.target.value)} placeholder="Buscar OS, cliente ou serviço"/></div>}{section==='services'&&<button className="primary" onClick={()=>setShowNew(true)}>+ Novo serviço</button>}</div></header>
 
       {section==='services' && <>
-        <section className="metrics">
-          <div className="metric"><span>Serviços em andamento</span><b>{services.filter(s=>!['Concluído','Cancelado'].includes(s.stage)).length}</b><small>operação ativa</small></div>
-          <div className="metric"><span>Em produção</span><b>{services.filter(s=>s.stage==='Produção').length}</b><small>na fábrica agora</small></div>
-          <div className="metric"><span>Valor em aberto</span><b>{money(totalOpen)}</b><small>orçamentos + pedidos</small></div>
-          <div className="metric"><span>Concluído recente</span><b>{money(totalDone)}</b><small>serviços finalizados</small></div>
+        <section className="dashboardHero">
+          <div className="heroCopy"><span className="heroKicker">PAINEL OPERACIONAL</span><h2>Visão geral da comunicação visual</h2><p>Acompanhe atendimento, produção, instalação e resultado sem perder nenhuma OS.</p><div className="heroActions"><button className="heroPrimary" onClick={()=>setShowNew(true)}>＋ Nova OS</button><button onClick={()=>{setSection('pcp');loadPcp()}}>Ver produção →</button></div></div>
+          <div className="heroFlow"><div><span>Atendimento</span><b>{services.filter(s=>s.stage==='Atendimento').length}</b></div><i>→</i><div><span>Aprovados</span><b>{services.filter(s=>s.stage==='Aprovado').length}</b></div><i>→</i><div><span>Produção</span><b>{services.filter(s=>s.stage==='Produção').length}</b></div><i>→</i><div><span>Instalação</span><b>{services.filter(s=>s.stage==='Instalação').length}</b></div></div>
         </section>
-
-
+        <section className="metrics">
+          <div className="metric metricActive"><span>Serviços em andamento</span><b>{services.filter(s=>!['Concluído','Cancelado'].includes(s.stage)).length}</b><small>operação ativa</small></div>
+          <div className="metric metricProduction"><span>Em produção</span><b>{services.filter(s=>s.stage==='Produção').length}</b><small>na fábrica agora</small></div>
+          <div className="metric metricValue"><span>Valor em aberto</span><b>{money(totalOpen)}</b><small>orçamentos + pedidos</small></div>
+          <div className="metric metricDone"><span>Concluído recente</span><b>{money(totalDone)}</b><small>serviços finalizados</small></div>
+        </section>
+        <section className="quickActions">
+          <button onClick={()=>setShowNew(true)}><i>＋</i><span><b>Nova OS</b><small>Iniciar atendimento</small></span></button>
+          <button onClick={()=>{setSection('clients');loadClients()}}><i>♙</i><span><b>Novo cliente</b><small>Cadastro e dados fiscais</small></span></button>
+          <button onClick={()=>{setSection('stock');loadMaterials()}}><i>⇩</i><span><b>Entrada NF-e</b><small>Atualizar materiais</small></span></button>
+          <button onClick={()=>{setSection('pcp');loadPcp()}}><i>▧</i><span><b>Produção</b><small>Fila e responsáveis</small></span></button>
+          <button onClick={()=>{setSection('finance');loadFinance()}}><i>↗</i><span><b>Financeiro</b><small>Receber e pagar</small></span></button>
+        </section>
 
         <div className="serviceToolbar"><div className="filters"><button className={filter==='Todos'?'selected':''} onClick={()=>setFilter('Todos')}>Todos <em>{services.length}</em></button>{stages.map(s=><button key={s} className={filter===s?'selected':''} onClick={()=>setFilter(s)}>{s} <em>{services.filter(x=>x.stage===s).length}</em></button>)}<button className={filter==='Cancelado'?'selected':''} onClick={()=>setFilter('Cancelado')}>Cancelados <em>{services.filter(x=>x.stage==='Cancelado').length}</em></button></div><div className="viewSwitch"><button className={viewMode==='kanban'?'selected':''} onClick={()=>setViewMode('kanban')}>▦ Quadro</button><button className={viewMode==='list'?'selected':''} onClick={()=>setViewMode('list')}>☷ Lista</button></div></div>
 

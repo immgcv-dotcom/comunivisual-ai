@@ -690,3 +690,21 @@ textarea{min-height:92px!important;padding-top:12px!important}
  .stageOnlyCard>.primary,.stageOnlyActions,.stageDoneLabel{grid-column:1/-1;width:100%}
  .stageOnlyActions{justify-content:stretch}.stageOnlyActions button{width:100%}
 }
+
+
+/* Edição do pedido disponível em qualquer etapa */
+.stageOnlyHead{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:16px!important}
+.editOrderBtn{min-height:38px;padding:0 13px;border:1px solid #dfe4eb;border-radius:10px;background:#fff;color:#4d596e;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.orderEditPanel{display:grid;gap:12px;margin:0 0 14px;padding:16px;border:1px solid #dfe4eb;border-radius:14px;background:#fff}
+.orderEditPanel>label,.orderEditPanel>div>label{display:grid;gap:6px;font-size:11px;font-weight:750;color:#536077}
+.orderEditPanel>div:not(.orderEditActions){display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.orderEditPanel input,.orderEditPanel select{width:100%;min-height:43px;padding:0 12px;border:1px solid #d9e0e9;border-radius:10px;background:#fbfcfe;color:#172033;font-size:12px;box-sizing:border-box}
+.orderEditActions{display:flex;justify-content:flex-end;gap:8px}
+.orderEditActions button{min-height:40px;padding:0 14px;border:1px solid #dfe4eb;border-radius:10px;background:#fff;color:#536077;font-size:11px;font-weight:800;cursor:pointer}
+.orderEditActions .primary{color:#fff!important;border-color:transparent!important}
+@media(max-width:640px){
+ .stageOnlyHead{padding-right:34px!important;flex-direction:column!important}
+ .editOrderBtn{width:100%}
+ .orderEditPanel>div:not(.orderEditActions){grid-template-columns:1fr}
+ .orderEditActions{flex-direction:column-reverse}.orderEditActions button{width:100%}
+}

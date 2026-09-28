@@ -7,11 +7,13 @@ type BoardStage = Exclude<Stage,'Cancelado'>
 type Service = {
   id: string
   dbId?: string
+  clientId?: string
   client: string
   title: string
   value: number
   stage: Stage
   due: string
+  dueIso?: string
   progress: number
   color: string
   estimatedCost?: number
@@ -46,6 +48,8 @@ export default function Home(){
   const [filter,setFilter]=useState<'Todos'|Stage>('Todos')
   const [services,setServices]=useState(initialServices)
   const [selected,setSelected]=useState<Service|null>(null)
+  const [editingOrder,setEditingOrder]=useState(false)
+  const [orderEdit,setOrderEdit]=useState({clientId:'',title:'',total:'',due:''})
   const [brand,setBrand]=useState({name:'ComuniVisual AI', primary:'#3157ff', accent:'#16c79a', logoText:'CV'})
   const [draftBrand,setDraftBrand]=useState(brand)
   const [companyInfo,setCompanyInfo]=useState({document:'',legalName:'',tradeName:'',stateRegistration:'',postalCode:'',street:'',number:'',complement:'',district:'',city:'',state:'',phone:'',whatsapp:'',email:'',logoUrl:''})
@@ -113,7 +117,7 @@ export default function Home(){
 
   useEffect(()=>{if(!authInfo)return;(async()=>{try{
     if(can('dashboard')){const dr=await fetch('/api/dashboard',{cache:'no-store'});if(dr.ok)setDashboard(await dr.json())}
-    if(can('services')){const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok)throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:x.stage==='Cancelado'?0:Math.max(0,Math.round(((stages.indexOf(x.stage as BoardStage)+1)/stages.length)*100)),color:'#3157ff',estimatedCost:Number(x.estimated_cost||0),actualCost:Number(x.actual_cost||0),estimatedMargin:Number(x.estimated_margin||0),minimumMargin:Number(x.minimum_margin||0),suggestedPrice:Number(x.suggested_price||0),quoteValidUntil:x.quote_valid_until||'',paymentTerms:x.payment_terms||'',quoteNotes:x.quote_notes||'',discount:Number(x.discount||0),productionHours:Number(x.production_hours||0),installationHours:Number(x.installation_hours||0),machineHours:Number(x.machine_hours||0),travelKm:Number(x.travel_km||0),installationScheduledAt:x.installation_scheduled_at||'',installationTeam:x.installation_team||'',installationAddress:x.installation_address||'',installationNotes:x.installation_notes||''})));setSelected(null)}}else setDbStatus('online')
+    if(can('services')){const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok)throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,clientId:x.client_id||'',id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',dueIso:x.due_date||'',progress:x.stage==='Cancelado'?0:Math.max(0,Math.round(((stages.indexOf(x.stage as BoardStage)+1)/stages.length)*100)),color:'#3157ff',estimatedCost:Number(x.estimated_cost||0),actualCost:Number(x.actual_cost||0),estimatedMargin:Number(x.estimated_margin||0),minimumMargin:Number(x.minimum_margin||0),suggestedPrice:Number(x.suggested_price||0),quoteValidUntil:x.quote_valid_until||'',paymentTerms:x.payment_terms||'',quoteNotes:x.quote_notes||'',discount:Number(x.discount||0),productionHours:Number(x.production_hours||0),installationHours:Number(x.installation_hours||0),machineHours:Number(x.machine_hours||0),travelKm:Number(x.travel_km||0),installationScheduledAt:x.installation_scheduled_at||'',installationTeam:x.installation_team||'',installationAddress:x.installation_address||'',installationNotes:x.installation_notes||''})));setSelected(null)}}else setDbStatus('online')
    }catch{setDbStatus('offline')}})()},[authInfo?.companyId])
 
   useEffect(()=>{(async()=>{const r=await fetch('/api/auth/me',{cache:'no-store'});if(r.status===401){window.location.href='/login';return}if(r.ok){const x=await r.json();setAuthInfo(x);loadCompany()}})()},[])
@@ -144,7 +148,7 @@ export default function Home(){
     if(!newService.title.trim()){setServiceMsg('Informe o serviço da OS.');return}
     const r=await fetch('/api/services',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(newService)})
     const x=await r.json().catch(()=>({}));if(!r.ok){setServiceMsg(x.error||'Erro ao criar OS.');return}
- const item:Service={dbId:x.id,id:x.code,client:x.client,title:x.title,value:Number(x.total),stage:x.stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:14,color:'#3157ff',estimatedCost:Number(x.estimated_cost||0),actualCost:Number(x.actual_cost||0),estimatedMargin:Number(x.estimated_margin||0),minimumMargin:Number(x.minimum_margin||0),suggestedPrice:Number(x.suggested_price||0)}
+ const item:Service={dbId:x.id,clientId:newService.clientId,id:x.code,client:x.client,title:x.title,value:Number(x.total),stage:x.stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',dueIso:x.due_date||'',progress:25,color:'#3157ff',estimatedCost:Number(x.estimated_cost||0),actualCost:Number(x.actual_cost||0),estimatedMargin:Number(x.estimated_margin||0),minimumMargin:Number(x.minimum_margin||0),suggestedPrice:Number(x.suggested_price||0)}
     setServices(p=>[item,...p]);setShowNew(false);setNewService({clientId:'',client:'',title:'',total:'',due:''});setServiceMsg('');setDbStatus('online');await loadDashboard()
   }
 
@@ -161,7 +165,28 @@ export default function Home(){
   const financeScale=Math.max(1,pendingReceivables,paidReceivables,pendingPayables,paidPayables)
   const lowStockNow=materials.filter((m:any)=>Number(m.stock_quantity)<=Number(m.min_stock)).length
 
-  function openService(s:Service){setSelected(s);setOsMsg('')}
+  function openService(s:Service){setSelected(s);setEditingOrder(false);setOsMsg('')}
+  async function openOrderEdit(){
+    if(!selected)return
+    if(!clients.length)await loadClients()
+    setOrderEdit({clientId:selected.clientId||'',title:selected.title,total:String(selected.value||0),due:selected.dueIso||''})
+    setEditingOrder(true);setOsMsg('')
+  }
+  async function saveOrderEdit(){
+    if(!selected?.dbId)return
+    if(!orderEdit.clientId){setOsMsg('Selecione o cliente.');return}
+    if(!orderEdit.title.trim()){setOsMsg('Informe o serviço.');return}
+    const total=Number(orderEdit.total)
+    if(!Number.isFinite(total)||total<0){setOsMsg('Informe um valor válido.');return}
+    setOsMsg('Salvando pedido...')
+    const r=await fetch('/api/services',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:selected.dbId,orderEdit})})
+    const x=await r.json().catch(()=>({}))
+    if(!r.ok){setOsMsg(x.error||'Não foi possível editar o pedido.');return}
+    const client=String(x.client||selected.client),dueIso=x.due_date||'',updated:Service={...selected,clientId:x.client_id||orderEdit.clientId,client,title:x.title,value:Number(x.total),due:dueIso?new Date(dueIso+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',dueIso}
+    setSelected(updated);setServices(prev=>prev.map(v=>v.id===updated.id?updated:v));setEditingOrder(false)
+    setOsMsg(x.paidChargePreserved?'Pedido atualizado. A cobrança já baixada foi preservada com o valor original.':'Pedido atualizado com sucesso.')
+    await loadDashboard()
+  }
 
   async function setStage(s:Service,next:Stage){
     if(s.stage===next) return
@@ -326,11 +351,16 @@ export default function Home(){
       <aside className="drawer stageOnlyDrawer" onClick={e=>e.stopPropagation()}>
         <button className="close" onClick={()=>setSelected(null)}>×</button>
         <div className="stageOnlyHead">
-          <span className="eyebrow">{selected.id}</span>
-          <h2>{selected.client}</h2>
-          <p>{selected.title} · {money(selected.value)}</p>
+          <div><span className="eyebrow">{selected.id}</span><h2>{selected.client}</h2><p>{selected.title} · {money(selected.value)}</p></div>
+          <button className="editOrderBtn" onClick={openOrderEdit}>Editar pedido</button>
         </div>
         {osMsg&&<div className="osAlert">{osMsg}</div>}
+        {editingOrder&&<div className="orderEditPanel">
+          <label>Cliente<select value={orderEdit.clientId} onFocus={()=>{if(!clients.length)loadClients()}} onChange={e=>setOrderEdit({...orderEdit,clientId:e.target.value})}><option value="">Selecione o cliente</option>{clients.map((c:any)=><option key={c.id} value={c.id}>{c.trade_name||c.name||c.legal_name}</option>)}</select></label>
+          <label>Serviço<input value={orderEdit.title} onChange={e=>setOrderEdit({...orderEdit,title:e.target.value})}/></label>
+          <div><label>Valor<input type="number" min="0" step="0.01" value={orderEdit.total} onChange={e=>setOrderEdit({...orderEdit,total:e.target.value})}/></label><label>Prazo<input type="date" value={orderEdit.due} onChange={e=>setOrderEdit({...orderEdit,due:e.target.value})}/></label></div>
+          <div className="orderEditActions"><button onClick={()=>setEditingOrder(false)}>Cancelar</button><button className="primary" onClick={saveOrderEdit}>Salvar alterações</button></div>
+        </div>}
         <div className="stageOnlyFlow">
           {stages.map((stage,index)=>{
             const currentIndex=stages.indexOf(selected.stage as BoardStage)

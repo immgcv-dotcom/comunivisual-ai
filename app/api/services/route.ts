@@ -9,7 +9,7 @@ const allowed=[...flow,'Cancelado']
 export async function GET(){
  try{
   const companyId=await ensureDb(),sql=getDb()
-  const rows=await sql`select w.id,w.code,w.title,w.stage,w.total,w.estimated_cost,w.actual_cost,w.production_hours,w.installation_hours,w.machine_hours,w.travel_km,w.quote_valid_until,w.payment_terms,w.quote_notes,w.discount,w.approved_at,w.due_date,w.created_at,c.name client, case when w.total>0 then round(((w.total-w.estimated_cost)/w.total)*100,2) else 0 end estimated_margin, coalesce(ps.minimum_margin_percent,0) minimum_margin, case when (1-(coalesce(ps.tax_percent,0)+coalesce(ps.commission_percent,0)+coalesce(ps.minimum_margin_percent,0))/100)>0 then round(greatest(w.estimated_cost-w.total*(coalesce(ps.tax_percent,0)+coalesce(ps.commission_percent,0))/100,0)/(1-(coalesce(ps.tax_percent,0)+coalesce(ps.commission_percent,0)+coalesce(ps.minimum_margin_percent,0))/100),2) else w.total end suggested_price from work_orders w left join clients c on c.id=w.client_id and c.company_id=w.company_id left join company_pricing_settings ps on ps.company_id=w.company_id where w.company_id=${companyId} order by w.created_at desc`
+  const rows=await sql`select w.id,w.client_id,w.code,w.title,w.stage,w.total,w.estimated_cost,w.actual_cost,w.production_hours,w.installation_hours,w.machine_hours,w.travel_km,w.quote_valid_until,w.payment_terms,w.quote_notes,w.discount,w.approved_at,w.due_date,w.created_at,c.name client, case when w.total>0 then round(((w.total-w.estimated_cost)/w.total)*100,2) else 0 end estimated_margin, coalesce(ps.minimum_margin_percent,0) minimum_margin, case when (1-(coalesce(ps.tax_percent,0)+coalesce(ps.commission_percent,0)+coalesce(ps.minimum_margin_percent,0))/100)>0 then round(greatest(w.estimated_cost-w.total*(coalesce(ps.tax_percent,0)+coalesce(ps.commission_percent,0))/100,0)/(1-(coalesce(ps.tax_percent,0)+coalesce(ps.commission_percent,0)+coalesce(ps.minimum_margin_percent,0))/100),2) else w.total end suggested_price from work_orders w left join clients c on c.id=w.client_id and c.company_id=w.company_id left join company_pricing_settings ps on ps.company_id=w.company_id where w.company_id=${companyId} order by w.created_at desc`
   return NextResponse.json(rows)
  }catch{return NextResponse.json({error:'Erro ao carregar serviços'},{status:500})}
 }
@@ -45,6 +45,30 @@ export async function PATCH(req:Request){
  try{
   const companyId=await ensureDb(),sql=getDb(),b=await req.json()
   if(!b.id)return NextResponse.json({error:'OS obrigatória'},{status:400})
+
+  if(b.orderEdit){
+   const q=b.orderEdit
+   const title=String(q.title||'').trim(),total=Number(q.total),clientId=String(q.clientId||'')
+   if(!title)return NextResponse.json({error:'Serviço é obrigatório'},{status:400})
+   if(!Number.isFinite(total)||total<0)return NextResponse.json({error:'Valor inválido'},{status:400})
+   const client=await sql`select id,name from clients where id=${clientId} and company_id=${companyId} limit 1`
+   if(!client.length)return NextResponse.json({error:'Cliente inválido'},{status:400})
+   let due:string|null=null
+   if(q.due){
+    const d=String(q.due).trim(),m=d.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+    if(!m)return NextResponse.json({error:'Data de entrega inválida'},{status:400})
+    const y=Number(m[1]),mo=Number(m[2]),day=Number(m[3]),parsed=new Date(Date.UTC(y,mo-1,day))
+    if(parsed.getUTCFullYear()!==y||parsed.getUTCMonth()!==mo-1||parsed.getUTCDate()!==day)return NextResponse.json({error:'Data de entrega inválida'},{status:400})
+    due=d
+   }
+   const current=await sql`select id,code from work_orders where id=${b.id} and company_id=${companyId} limit 1`
+   if(!current.length)return NextResponse.json({error:'OS não encontrada'},{status:404})
+   const rows=await sql`update work_orders set client_id=${clientId},title=${title},total=${total},due_date=${due} where id=${b.id} and company_id=${companyId} returning *`
+   const pending=await sql`update financial_entries set description=${'Cobrança '+current[0].code+' — '+title},amount=${total},due_date=${due} where company_id=${companyId} and work_order_id=${b.id} and entry_type='receivable' and status='pending' returning id`
+   const paid=await sql`select id from financial_entries where company_id=${companyId} and work_order_id=${b.id} and entry_type='receivable' and status='paid' limit 1`
+   await sql`insert into work_order_events(company_id,work_order_id,event_type,title,detail) values(${companyId},${b.id},'edit','Pedido editado',${'Cliente/serviço/valor/prazo atualizados'})`
+   return NextResponse.json({...rows[0],client:client[0].name,pendingChargeUpdated:pending.length>0,paidChargePreserved:paid.length>0})
+  }
 
   if(b.quoteDetails){
    const q=b.quoteDetails

@@ -620,3 +620,51 @@ textarea{min-height:92px!important;padding-top:12px!important}
   .metrics .metricValue>b,
   .metrics .metricDone>b{font-size:24px!important}
 }
+
+
+/* OS simplificada — foco no essencial */
+.simpleOsDrawer{width:min(760px,96vw)!important;padding:24px!important;background:#f7f8fb!important}
+.simpleOsHead{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:6px 2px 16px}
+.simpleOsHead h2{margin:5px 0 4px!important;font-size:24px!important;line-height:1.15!important}
+.simpleOsHead p{margin:0!important;font-size:13px!important;color:#788397!important}
+.simpleStageBadge{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 12px;border-radius:999px;background:#eef1ff;color:#5361e8;font-size:11px;font-weight:800;white-space:nowrap}
+.simpleOsFacts{display:grid;grid-template-columns:1.2fr .9fr .9fr;gap:10px;margin-bottom:14px}
+.simpleOsFacts>div{display:grid;gap:4px;padding:14px 15px;border:1px solid #e6eaf0;border-radius:13px;background:#fff}
+.simpleOsFacts span,.simpleSummaryCard span,.simpleNextAction span{font-size:10px;font-weight:700;color:#8a94a6}
+.simpleOsFacts b{font-size:15px;color:#1f2a3d}
+.simpleProgress{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 18px;padding:13px 14px;border:1px solid #e7ebf1;border-radius:13px;background:#fff}
+.simpleProgress>div{display:flex;align-items:center;gap:7px;min-width:0}
+.simpleProgress i{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#d9dee8}
+.simpleProgress span{font-size:10px;color:#919aad;white-space:nowrap}
+.simpleProgress .done i{background:#6c75ee}.simpleProgress .active span{color:#354056;font-weight:800}
+.simpleOsTabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;padding:5px;border-radius:12px;background:#e9edf3}
+.simpleOsTabs button{min-height:40px;border:0;border-radius:9px;background:transparent;color:#6d788d;font-size:11px;font-weight:750}
+.simpleOsTabs button.active{background:#fff;color:#172033;box-shadow:0 3px 10px rgba(29,38,58,.06)}
+.simpleSummary,.simpleTabContent{display:grid;gap:13px}
+.simpleSummaryCard{display:grid;grid-template-columns:1fr 1fr;gap:1px;border:1px solid #e7ebf1;border-radius:14px;overflow:hidden;background:#e7ebf1}
+.simpleSummaryCard>div{display:grid;gap:5px;padding:16px;background:#fff}
+.simpleSummaryCard b{font-size:13px;line-height:1.35;color:#263248}
+.simpleNextAction{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px;border:1px solid #dfe4ff;border-radius:14px;background:#f5f6ff}
+.simpleNextAction>div{display:grid;gap:3px}.simpleNextAction b{font-size:14px;color:#2b3450}
+.simpleNextAction .primary{min-width:160px}
+.simpleSecondaryActions{display:flex;gap:8px;flex-wrap:wrap}
+.simpleSecondaryActions button,.simpleButtonRow button{min-height:39px;padding:0 13px;border:1px solid #e1e6ed;border-radius:10px;background:#fff;color:#4d596e;font-size:11px;font-weight:750}
+.simpleSectionTitle{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.simpleSectionTitle h3{margin:0;font-size:18px}.simpleSectionTitle p{margin:4px 0 0;font-size:11px;color:#8b95a6}.simpleSectionTitle>strong{font-size:18px}
+.simpleQuoteForm{padding:14px!important;border:1px solid #e7ebf1!important;border-radius:13px!important;background:#fff!important}
+.simpleQuoteLines{display:grid;gap:7px}.simpleEmpty{padding:18px;border:1px dashed #dfe4eb;border-radius:12px;text-align:center;color:#8d97a8;font-size:11px;background:#fff}
+.simpleQuoteSettings{display:grid;gap:10px;padding:14px;border:1px solid #e7ebf1;border-radius:13px;background:#fff}.simpleQuoteSettings label{display:grid;gap:6px}
+.simpleButtonRow{display:flex;gap:8px;flex-wrap:wrap}.simpleButtonRow .primary{color:#fff!important;border-color:transparent!important}
+.simpleExecutionBlock{display:grid;gap:6px;padding:18px;border:1px solid #e3e7ee;border-radius:14px;background:#fff}.simpleExecutionBlock>span{font-size:10px;color:#8b95a6}.simpleExecutionBlock>b{font-size:20px;color:#1f2a3d}.simpleExecutionBlock .primary{margin-top:7px;width:max-content}
+.simpleDetails{border:1px solid #e5e9ef;border-radius:12px;background:#fff;overflow:hidden}.simpleDetails summary{cursor:pointer;padding:13px 15px;font-size:11px;font-weight:800;color:#4d596e}.simpleDetails[open] summary{border-bottom:1px solid #edf0f4}
+.simpleTaskList,.simpleMaterialList,.simpleInstall{display:grid;gap:8px;padding:12px}.simpleTaskList>div,.simpleMaterialList>div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border-radius:9px;background:#f8fafc}.simpleTaskList span{display:grid}.simpleTaskList b,.simpleMaterialList span{font-size:11px}.simpleTaskList small{font-size:9px;color:#929cad}.simpleTaskList button{min-height:30px;border:1px solid #dfe4eb;border-radius:8px;background:#fff;font-size:10px}.simpleTaskList .done{opacity:.6}.simpleInstall label{display:grid;gap:5px}
+.simpleEventComposer{padding:14px;border:1px solid #e5e9ef;border-radius:12px;background:#fff}.simpleHistory{display:grid;gap:8px}
+@media(max-width:640px){
+ .simpleOsDrawer{padding:16px!important}
+ .simpleOsHead{padding-right:30px}
+ .simpleOsFacts{grid-template-columns:1fr}
+ .simpleProgress{grid-template-columns:1fr 1fr}
+ .simpleOsTabs{grid-template-columns:1fr 1fr}
+ .simpleSummaryCard{grid-template-columns:1fr}
+ .simpleNextAction{align-items:flex-start;flex-direction:column}.simpleNextAction .primary{width:100%}
+}

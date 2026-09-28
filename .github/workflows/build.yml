@@ -27,13 +27,12 @@ jobs:
           DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
       - name: Production URL health check
         if: success()
-        continue-on-error: true
         shell: bash
         run: |
           URL="https://comunivisual-ai.immgcv.workers.dev/api/health"
           echo "Build local aprovado. Verificando a aplicação publicada em $URL"
           for attempt in 1 2 3 4 5; do
-            body="$(curl --silent --show-error --fail --max-time 15 "$URL" 2>/dev/null || true)"
+            body="$(curl --silent --show-error --max-time 15 "$URL" 2>&1 || true)"\n            echo "Resposta: $body"
             if echo "$body" | grep -q '"ok":true' && echo "$body" | grep -q '"database":"connected"'; then
               echo "Produção online e banco conectado."
               exit 0

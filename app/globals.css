@@ -755,3 +755,13 @@ textarea{min-height:92px!important;padding-top:12px!important}
  .financeTransactionActions{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr!important}
  .financeTransactionActions .paymentMethodSelect,.financeTransactionActions .financeStatus,.financeTransactionActions .financeDelete{width:100%!important;max-width:none!important}
 }
+
+
+/* Reabertura controlada + cobrança persistente */
+.chargeState{font-size:11px;color:#7a8597;font-weight:700;white-space:nowrap}
+.chargePaid{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border-radius:10px;background:#ecf8f2;color:#15815b;font-size:11px;font-weight:800;white-space:nowrap}
+.reopenOrderBtn{min-height:42px;padding:0 14px;border:1px solid #d7dde6;border-radius:10px;background:#fff;color:#4d596e;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.reopenOrderBtn:hover{border-color:var(--primary);color:var(--primary);background:#f8f9ff}
+@media(max-width:720px){
+ .reopenOrderBtn,.whatsappCharge,.chargePaid,.chargeState{width:100%;justify-content:center;text-align:center}
+}

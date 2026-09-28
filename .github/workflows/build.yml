@@ -19,6 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: TypeScript and Next.js build
@@ -28,7 +29,18 @@ jobs:
       - name: Production URL health check
         if: success()
         continue-on-error: true
+        shell: bash
         run: |
-          echo "Build aprovado. O Cloudflare conectado ao GitHub publica a branch main automaticamente."
-          echo "Após a publicação, o endpoint de saúde pode ser conferido em:"
-          echo "https://comunivisual-ai.immgcv.workers.dev/api/health"
+          URL="https://comunivisual-ai.immgcv.workers.dev/api/health"
+          echo "Build local aprovado. Verificando a aplicação publicada em $URL"
+          for attempt in 1 2 3 4 5; do
+            body="$(curl --silent --show-error --fail --max-time 15 "$URL" 2>/dev/null || true)"
+            if echo "$body" | grep -q '"ok":true' && echo "$body" | grep -q '"database":"connected"'; then
+              echo "Produção online e banco conectado."
+              exit 0
+            fi
+            echo "Tentativa $attempt/5 ainda sem resposta saudável."
+            sleep 12
+          done
+          echo "::warning::O build passou, mas a URL de produção não confirmou saúde nesta janela."
+          exit 1

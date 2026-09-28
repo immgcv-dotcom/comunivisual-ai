@@ -143,7 +143,7 @@ export default function Home(){
   const boardServices=filter==='Todos'?services.filter(s=>s.stage!=='Cancelado'&&(!serviceSearch.trim()||[s.id,s.client,s.title,s.stage].some(v=>String(v).toLowerCase().includes(serviceSearch.toLowerCase().trim())))):searchedServices
   const totalOpen=services.filter(s=>!['Concluído','Cancelado'].includes(s.stage)).reduce((a,b)=>a+b.value,0)
   const totalDone=services.filter(s=>s.stage==='Concluído').reduce((a,b)=>a+b.value,0)
-  const activeServices=activeServices
+  const activeServices=services.filter(s=>!['Concluído','Cancelado'].includes(s.stage)).length
   const pendingReceivables=financeEntries.filter((x:any)=>x.entry_type==='receivable'&&x.status==='pending').reduce((a:number,x:any)=>a+Number(x.amount||0),0)
   const paidReceivables=financeEntries.filter((x:any)=>x.entry_type==='receivable'&&x.status==='paid').reduce((a:number,x:any)=>a+Number(x.amount||0),0)
   const pendingPayables=financeEntries.filter((x:any)=>x.entry_type==='payable'&&x.status==='pending').reduce((a:number,x:any)=>a+Number(x.amount||0),0)

@@ -92,6 +92,6 @@ export async function ensureDb(){
  let companies=await sql`select id from companies where slug=${configuredSlug} limit 1`
  if(!companies.length){ await sql`insert into companies(name,slug) values (${configuredName},${configuredSlug}) on conflict(slug) do nothing`; companies=await sql`select id from companies where slug=${configuredSlug} limit 1` }
  const companyId=companies[0].id as string
- if(process.env.DEMO_SEED!=='false')await seedDemoData(sql,companyId)
+ if(process.env.DEMO_SEED==='true')await seedDemoData(sql,companyId)
  return companyId
 }

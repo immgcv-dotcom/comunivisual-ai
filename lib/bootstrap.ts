@@ -1,6 +1,12 @@
 import { getDb } from './db'
 export async function ensureDb(){
  const sql=getDb()
+ const ready=await sql`select to_regclass('public.financial_entries') is not null as ready`
+ if(ready[0]?.ready){
+  let companies=await sql`select id from companies where slug=${configuredSlug} limit 1`
+  if(!companies.length){ await sql`insert into companies(name,slug) values (${configuredName},${configuredSlug}) on conflict(slug) do nothing`; companies=await sql`select id from companies where slug=${configuredSlug} limit 1` }
+  return companies[0].id as string
+ }
  await sql`create table if not exists companies (id uuid primary key default gen_random_uuid(), name text not null, slug text unique not null, primary_color text not null default '#3157ff', accent_color text not null default '#16c79a', created_at timestamptz not null default now())`
  await sql`alter table companies add column if not exists document text`
  await sql`alter table companies add column if not exists phone text`

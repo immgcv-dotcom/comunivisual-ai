@@ -765,3 +765,177 @@ textarea{min-height:92px!important;padding-top:12px!important}
 @media(max-width:720px){
  .reopenOrderBtn,.whatsappCharge,.chargePaid,.chargeState{width:100%;justify-content:center;text-align:center}
 }
+
+
+/* =========================================================
+   COMUNIVISUAL — PREMIUM SIMPLE UI
+   Produto simples para gráfica, comunicação visual e brindes
+   ========================================================= */
+:root{
+  --app-bg:#f3f5f9;
+  --app-ink:#111827;
+  --app-muted:#718096;
+  --app-line:#e4e8ef;
+  --app-navy:#0e1729;
+  --app-navy-2:#16213a;
+}
+body{background:var(--app-bg)!important;color:var(--app-ink)!important}
+.app{grid-template-columns:252px minmax(0,1fr)!important;background:var(--app-bg)!important}
+.sidebar.sidebarLabeled{
+  width:252px!important;
+  padding:22px 15px!important;
+  background:
+    radial-gradient(circle at 20% 5%,color-mix(in srgb,var(--primary) 34%,transparent),transparent 30%),
+    linear-gradient(180deg,#10192c 0%,#0b1323 100%)!important;
+  border-right:1px solid rgba(255,255,255,.06)!important;
+  box-shadow:18px 0 50px rgba(15,23,42,.07)!important;
+}
+.sidebarLabeled .brandBlock{
+  min-height:72px!important;padding:10px 10px 22px!important;margin-bottom:14px!important;
+  border-bottom:1px solid rgba(255,255,255,.09)!important
+}
+.sidebarLabeled .brandLogo{
+  width:42px!important;height:42px!important;border-radius:13px!important;
+  background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 58%,#b28cff))!important;
+  box-shadow:0 10px 28px color-mix(in srgb,var(--primary) 30%,transparent)!important
+}
+.sidebarLabeled .brandBlock strong{font-size:13px!important;color:#fff!important;letter-spacing:-.01em!important}
+.sidebarLabeled .brandBlock span{font-size:10px!important;color:#8997ae!important}
+.sidebarLabeled nav{gap:5px!important}
+.sidebarLabeled nav button,.sidebarLabeled .sideLink,.sidebarLabeled .sidebarBottom>button{
+  min-height:46px!important;border-radius:11px!important;padding:0 13px!important;
+  color:#9da9bb!important;background:transparent!important;border:1px solid transparent!important;
+  font-size:12px!important;font-weight:700!important;transition:.16s ease!important
+}
+.sidebarLabeled nav button:hover,.sidebarLabeled .sideLink:hover,.sidebarLabeled .sidebarBottom>button:hover{
+  background:rgba(255,255,255,.055)!important;color:#fff!important
+}
+.sidebarLabeled nav button.active,.sidebarLabeled .sidebarBottom>button.active{
+  color:#fff!important;background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 90%,#fff),var(--primary))!important;
+  box-shadow:0 10px 28px color-mix(in srgb,var(--primary) 25%,transparent)!important
+}
+.sidebarLabeled .navIcon{width:25px!important;text-align:center!important;font-style:normal!important;font-size:14px!important}
+.sidebarAdminLabel{padding:8px 12px 5px;color:#5f6d84;font-size:8px;font-weight:900;letter-spacing:.15em}
+.sidebarLabeled .user{margin-top:8px!important;padding:12px!important;border-top:1px solid rgba(255,255,255,.08)!important}
+.sidebarLabeled .user b{color:#eef3fb!important}.sidebarLabeled .user small{color:#7e8ca3!important}
+
+.mainArea{padding:28px 32px 70px!important;max-width:1680px!important;width:100%!important;box-sizing:border-box!important;margin:0 auto!important}
+.appHeader{min-height:94px!important;margin-bottom:24px!important;align-items:center!important}
+.pageEyebrow{font-size:9px!important;font-weight:900!important;letter-spacing:.18em!important;color:var(--primary)!important}
+.appHeader h1{font-size:27px!important;letter-spacing:-.04em!important;margin:4px 0 6px!important;color:#101828!important}
+.appHeader p{font-size:12px!important;color:#7b8798!important}
+.headerActions{align-items:center!important}
+.headerActions .primary{border-radius:11px!important;min-height:44px!important;padding:0 16px!important}
+.dbBadge{display:none!important}
+
+/* Home */
+.simpleHome{display:grid;gap:18px}
+.homeHeroPremium{
+  position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(360px,.9fr);
+  gap:32px;align-items:center;min-height:310px;padding:38px 42px;border-radius:25px;
+  background:
+    radial-gradient(circle at 15% 5%,color-mix(in srgb,var(--primary) 32%,transparent),transparent 34%),
+    radial-gradient(circle at 96% 100%,rgba(99,102,241,.18),transparent 34%),
+    linear-gradient(135deg,#101a30,#0b1323);
+  color:#fff;box-shadow:0 20px 55px rgba(15,23,42,.16)
+}
+.homeHeroPremium:after{content:"";position:absolute;width:260px;height:260px;border:1px solid rgba(255,255,255,.06);border-radius:50%;right:-110px;top:-120px}
+.homeHeroCopy{position:relative;z-index:1;max-width:690px}
+.homeOverline{font-size:9px;font-weight:900;letter-spacing:.18em;color:#93a4ff}
+.homeHeroCopy h2{margin:10px 0 14px;font-size:clamp(30px,3vw,48px);line-height:1.03;letter-spacing:-.055em;color:#fff}
+.homeHeroCopy p{max-width:560px;margin:0;color:#a9b5c8;font-size:13px;line-height:1.65}
+.homeHeroActions{display:flex;gap:10px;margin-top:25px}
+.homeMainCta,.homeGhostCta{min-height:45px;padding:0 17px;border-radius:11px;font-size:12px;font-weight:800;cursor:pointer}
+.homeGhostCta{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff}
+.homeFlowPreview{position:relative;z-index:1;display:grid;gap:8px}
+.homeFlowStep{display:grid;grid-template-columns:38px 1fr;gap:12px;align-items:center;padding:12px 14px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:rgba(255,255,255,.045);backdrop-filter:blur(8px)}
+.homeFlowStep>span{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.08);font-size:11px;font-weight:900;color:#d6deeb}
+.homeFlowStep>div{display:grid;grid-template-columns:1fr auto;align-items:center;gap:1px 12px}
+.homeFlowStep small{grid-column:1/-1;font-size:7px;letter-spacing:.13em;color:#718098}
+.homeFlowStep b{font-size:13px;color:#fff}.homeFlowStep em{font-size:9px;font-style:normal;color:#94a2b6}
+.homeFlowStep1>span{background:#fff7e6;color:#b26b00}.homeFlowStep2>span{background:#eef0ff;color:#5664e8}.homeFlowStep3>span{background:#eaf9f3;color:#16835d}
+
+.homeNumbers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.homeNumbers button{position:relative;min-width:0;min-height:126px;text-align:left;padding:20px 20px;border:1px solid var(--app-line);border-radius:16px;background:#fff;cursor:pointer;box-shadow:0 4px 18px rgba(15,23,42,.025);transition:.16s ease}
+.homeNumbers button:hover{transform:translateY(-2px);border-color:#d2d8e4;box-shadow:0 10px 28px rgba(15,23,42,.06)}
+.homeNumbers span,.homeNumbers small{display:block;color:#7c8798;font-size:10px;font-weight:700}
+.homeNumbers b{display:block;margin:8px 0 5px;font-size:23px;line-height:1.05;letter-spacing:-.04em;color:#131c2d;white-space:nowrap}
+.homeNumbers i{position:absolute;right:18px;top:18px;font-style:normal;color:#a1aaba}
+
+.homeWorkspace{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.45fr);gap:14px;align-items:start}
+.homeRecent{padding:0!important;overflow:hidden!important;border-radius:17px!important}
+.premiumPanelTitle{display:flex;align-items:center;justify-content:space-between;padding:20px 21px 14px;border-bottom:1px solid #edf0f4}
+.premiumPanelTitle span{font-size:8px;font-weight:900;letter-spacing:.15em;color:#9aa4b5}.premiumPanelTitle h3{margin:4px 0 0;font-size:16px;letter-spacing:-.02em}
+.premiumPanelTitle button{border:0;background:transparent;color:var(--primary);font-size:10px;font-weight:800;cursor:pointer}
+.homeRecentList{display:grid}
+.homeRecentList>button{display:grid;grid-template-columns:minmax(0,1fr) auto auto 18px;align-items:center;gap:14px;min-height:68px;padding:11px 20px;border:0;border-top:1px solid #f1f3f6;background:#fff;text-align:left;cursor:pointer}
+.homeRecentList>button:hover{background:#fafbfc}
+.homeRecentList>button>div{display:grid;gap:3px;min-width:0}.homeRecentList b{font-size:12px;color:#263247}.homeRecentList span{font-size:9px;color:#9099a8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.homeRecentList strong{font-size:11px;color:#263247;white-space:nowrap}.homeRecentList i{font-style:normal;color:#aab2c0}
+.homeStage{padding:5px 8px;border-radius:999px;background:#f0f2f6;color:#667085!important;font-weight:800!important}
+.homeStage.orcamento{background:#fff6df;color:#a56a00!important}.homeStage.aprovado{background:#eef0ff;color:#5863d9!important}.homeStage.producao{background:#eaf3ff;color:#2d6bbd!important}.homeStage.concluido{background:#eaf9f3;color:#17805c!important}
+.homeEmpty{display:grid;justify-items:center;text-align:center;padding:42px 22px}.homeEmpty>div{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:#eef1ff;color:var(--primary);font-size:19px}.homeEmpty b{margin-top:12px;font-size:14px}.homeEmpty span{max-width:390px;margin:6px 0 16px;font-size:11px;line-height:1.5;color:#8590a2}
+.homeSideStack{display:grid;gap:10px}.homeActionCard{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:11px;padding:16px;border:1px solid var(--app-line);border-radius:15px;background:#fff}.homeActionIcon{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#f0f2ff;color:var(--primary);font-size:15px;font-weight:900}.homeActionCard div{display:grid;gap:2px}.homeActionCard b{font-size:11px}.homeActionCard small{font-size:9px;line-height:1.35;color:#8b95a6}.homeActionCard button{border:0;background:transparent;color:var(--primary);font-size:10px;font-weight:850;cursor:pointer}
+
+/* Orders */
+.ordersPage{display:grid;gap:16px}
+.ordersIntro{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:22px 24px;border:1px solid var(--app-line);border-radius:18px;background:#fff}
+.ordersEyebrow{font-size:8px;font-weight:900;letter-spacing:.16em;color:var(--primary)}
+.ordersIntro h2{margin:6px 0 5px;font-size:20px;letter-spacing:-.035em}.ordersIntro p{margin:0;font-size:11px;color:#8a94a6}
+.ordersNewButton{min-width:145px}
+.ordersToolbar{margin:0!important;padding:4px 0!important}.ordersToolbar .filters{margin:0!important;padding:0!important}
+.ordersToolbar .filters button{background:#fff!important;border-radius:10px!important}
+.ordersToolbar .filters button.selected{background:#111a2d!important;border-color:#111a2d!important;color:#fff!important}
+.ordersToolbar .filters em{background:rgba(127,138,157,.13)!important}
+.ordersBoard{grid-template-columns:repeat(4,minmax(250px,1fr))!important;gap:11px!important;overflow:auto!important;padding-bottom:8px!important}
+.ordersBoard .kanbanColumn{min-height:510px!important;padding:10px!important;border:1px solid #e5e9ef!important;border-top:0!important;border-radius:15px!important;background:#eceff4!important}
+.ordersBoard .kanbanColumn:before{content:"";display:block;height:3px;margin:-10px -10px 9px;border-radius:15px 15px 0 0;background:#a4acb9}
+.ordersBoard .stage1:before{background:#f0a629}.ordersBoard .stage2:before{background:#6673ee}.ordersBoard .stage3:before{background:#20a878}
+.ordersBoard .kanbanHead{padding:8px 5px 13px!important}.ordersBoard .kanbanHead>div{display:flex;align-items:center;gap:7px}.ordersBoard .kanbanHead .stageIndex{font-size:8px;color:#a0a9b7!important;font-weight:900!important}.ordersBoard .kanbanHead b{font-size:12px!important;color:#2d3748!important}.ordersBoard .kanbanHead>div>span:last-child{display:grid;place-items:center;min-width:22px;height:22px;padding:0 5px;border-radius:7px;background:#fff;color:#677386;font-size:9px!important}
+.ordersBoard .kanbanCard{padding:15px!important;border:1px solid #e3e7ed!important;border-radius:13px!important;box-shadow:0 3px 12px rgba(15,23,42,.035)!important}
+.ordersBoard .kanbanCard:hover{transform:translateY(-2px)!important;box-shadow:0 10px 24px rgba(15,23,42,.07)!important}
+.ordersBoard .kanbanCard h3{margin:13px 0 4px!important;font-size:13px!important;color:#1e293b!important}.ordersBoard .kanbanCard p{height:auto!important;min-height:34px!important;margin-bottom:13px!important;color:#7f899a!important;font-size:11px!important}
+.orderCardInfo{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 0;border-top:1px solid #f0f2f5;border-bottom:1px solid #f0f2f5}
+.orderCardInfo>span{display:grid;gap:2px}.orderCardInfo small{font-size:7px;color:#a0a8b5;letter-spacing:.08em;font-weight:900}.orderCardInfo b,.orderCardInfo strong{font-size:10px;color:#354055}
+.ordersBoard .cardFoot{margin-top:11px!important}.ordersBoard .cardFoot span:first-child{color:#69758a!important;font-weight:700!important}.ordersBoard .cardFoot span:last-child{font-weight:850!important}
+.ordersBoard .emptyStage{display:grid;justify-items:center;gap:4px;padding:35px 10px!important;background:rgba(255,255,255,.35)!important}.ordersBoard .emptyStage b{font-size:10px;color:#7d8798}.ordersBoard .emptyStage span{font-size:8px;color:#a1a9b6;text-align:center}
+.archivedBoard{grid-template-columns:minmax(280px,420px)!important}
+
+/* Order drawer */
+.stageOnlyDrawer{width:min(720px,96vw)!important;background:#f4f6f9!important;padding:28px!important}
+.stageOnlyHead{padding:4px 2px 18px!important}.stageOnlyHead h2{font-size:23px!important;letter-spacing:-.035em!important}
+.stageOnlyFlow{gap:9px!important}.stageOnlyCard{min-height:88px!important;border-radius:14px!important;box-shadow:none!important}.stageOnlyCard.current{border-color:color-mix(in srgb,var(--primary) 35%,#dfe4eb)!important;background:linear-gradient(135deg,#fff,#fafbff)!important;box-shadow:0 8px 26px color-mix(in srgb,var(--primary) 8%,transparent)!important}
+.whatsappQuote,.whatsappCharge{min-height:42px;padding:0 14px;border-radius:10px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.whatsappQuote{border:1px solid #cfd7ff;background:#f1f3ff;color:#4f5ed9}
+.whatsappQuote:hover{background:#e9ecff}
+
+/* Clients, finance and settings become calmer */
+.section-clients .clientsPage,.section-finance .financePage,.section-stock .stockPage,.section-brand .brandPage{margin-top:4px}
+.financeHero{background:linear-gradient(135deg,#101a30,#172442)!important;border-radius:18px!important;padding:24px 26px!important}
+.financeCards>div,.clientEditor,.brandEditor,.stockEditor{border-radius:15px!important}
+.section-brand .pricingPanel{display:none!important}
+.invoiceImport{display:none!important}
+
+/* Generic cards */
+.panel{border-color:var(--app-line)!important;box-shadow:0 4px 18px rgba(15,23,42,.025)!important}
+.clientRowButton,.stockRow,.catalogRow{border-radius:10px!important}
+.primary{background:linear-gradient(135deg,var(--primary),color-mix(in srgb,var(--primary) 82%,#7567ff))!important;border-color:transparent!important}
+
+/* responsive */
+@media(max-width:1180px){
+  .homeHeroPremium{grid-template-columns:1fr!important}.homeFlowPreview{grid-template-columns:1fr 1fr!important}
+  .homeNumbers{grid-template-columns:1fr 1fr!important}.homeWorkspace{grid-template-columns:1fr!important}
+  .ordersBoard{grid-template-columns:repeat(4,minmax(270px,78vw))!important}
+}
+@media(max-width:760px){
+  .app{display:block!important}.sidebar.sidebarLabeled{position:relative!important;width:100%!important;height:auto!important}
+  .sidebarLabeled nav{display:grid!important;grid-template-columns:1fr 1fr!important}
+  .sidebarAdminLabel,.sidebarLabeled .user{display:none!important}
+  .mainArea{padding:18px 13px 60px!important}
+  .appHeader{align-items:flex-start!important;flex-direction:column!important}.headerActions{width:100%!important}.headerActions .primary{width:100%!important}
+  .homeHeroPremium{padding:27px 22px!important;border-radius:19px!important}.homeHeroCopy h2{font-size:31px!important}.homeFlowPreview{grid-template-columns:1fr!important}
+  .homeNumbers{grid-template-columns:1fr!important}.homeRecentList>button{grid-template-columns:1fr auto!important}.homeRecentList strong,.homeRecentList i{display:none!important}
+  .ordersIntro{align-items:flex-start!important;flex-direction:column!important}.ordersNewButton{width:100%!important}
+  .ordersToolbar{display:grid!important;gap:8px!important}.ordersToolbar .filters{overflow:auto!important}.ordersToolbar .viewSwitch{justify-self:start!important}
+  .stageOnlyActions{width:100%!important;display:grid!important}.stageOnlyActions>*{width:100%!important}
+}

@@ -1,4 +1,5 @@
 name: Production Check
+# Current production trigger: Cloudflare must build the newest main commit, not retry an older deployment.
 on:
   push:
     branches: [main]

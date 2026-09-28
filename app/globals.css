@@ -708,3 +708,50 @@ textarea{min-height:92px!important;padding-top:12px!important}
  .orderEditPanel>div:not(.orderEditActions){grid-template-columns:1fr}
  .orderEditActions{flex-direction:column-reverse}.orderEditActions button{width:100%}
 }
+
+
+/* Central de Serviços — edição sempre visível */
+.cardTopActions{display:flex;align-items:center;gap:8px}
+.cardEditBtn{border:1px solid #dce2ea;background:#fff;color:#4f5c72;border-radius:8px;padding:5px 9px;font-size:10px;font-weight:800;cursor:pointer}
+.cardEditBtn:hover{border-color:var(--primary);color:var(--primary);background:#f8f9ff}
+.serviceListHead{grid-template-columns:1.2fr 1.2fr .8fr .7fr .7fr 74px!important}
+.serviceListRow{display:grid!important;grid-template-columns:minmax(0,1fr) 74px!important;gap:8px!important;align-items:center!important}
+.serviceListMain{display:grid!important;grid-template-columns:1.2fr 1.2fr .8fr .7fr .7fr!important;gap:12px!important;align-items:center!important;width:100%!important;min-width:0!important;border:0!important;background:transparent!important;text-align:left!important;padding:0!important;color:inherit!important;cursor:pointer!important}
+.serviceListActions{display:flex;justify-content:flex-end}
+.serviceListActions button{min-height:34px;padding:0 10px;border:1px solid #dce2ea;border-radius:8px;background:#fff;color:#4f5c72;font-size:10px;font-weight:800;cursor:pointer}
+.serviceListActions button:hover{border-color:var(--primary);color:var(--primary)}
+@media(max-width:900px){
+ .serviceListHead{display:none!important}
+ .serviceListRow{grid-template-columns:1fr!important;padding:12px 0!important}
+ .serviceListMain{grid-template-columns:1fr 1fr!important}
+ .serviceListActions{justify-content:stretch}.serviceListActions button{width:100%}
+}
+
+/* Financeiro — sem sobreposição e sem Invalid Date */
+.financeTransaction{
+  display:grid!important;
+  grid-template-columns:34px minmax(220px,1fr) auto 110px!important;
+  gap:10px 14px!important;
+  align-items:center!important;
+  padding:14px 0!important;
+}
+.financeTransaction .txDescription{min-width:0!important}
+.financeTransaction>strong{white-space:nowrap!important;font-size:13px!important}
+.financeTransaction .financeDue{white-space:nowrap!important;text-align:right!important;font-size:11px!important;color:#667085!important}
+.financeTransactionActions{
+  grid-column:2/-1!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  min-width:0!important;
+}
+.financeTransactionActions .paymentMethodSelect{width:min(220px,100%)!important;max-width:220px!important;min-width:150px!important}
+.financeTransactionActions .financeStatus{min-width:130px!important;text-align:center!important}
+.financeTransactionActions .financeDelete{min-width:65px!important}
+@media(max-width:760px){
+ .financeTransaction{grid-template-columns:34px 1fr!important}
+ .financeTransaction>strong,.financeTransaction .financeDue{grid-column:2!important;text-align:left!important}
+ .financeTransactionActions{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr!important}
+ .financeTransactionActions .paymentMethodSelect,.financeTransactionActions .financeStatus,.financeTransactionActions .financeDelete{width:100%!important;max-width:none!important}
+}

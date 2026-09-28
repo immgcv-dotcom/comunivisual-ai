@@ -143,6 +143,6 @@ export async function ensureDb(permission?:string){
  const {getAuthContext}=await import('./auth')
  const ctx=await getAuthContext()
  if(!ctx)throw new Error('AUTH_REQUIRED')
- if(permission&&!ctx.permissions.includes(permission))throw new Error('FORBIDDEN')
+ if(permission&&!ctx.permissions.map(String).includes(permission))throw new Error('FORBIDDEN')
  return ctx.companyId
 }

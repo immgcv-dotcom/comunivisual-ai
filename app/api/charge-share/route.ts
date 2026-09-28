@@ -6,6 +6,17 @@ export const dynamic='force-dynamic'
 const brMoney=(v:unknown)=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 const phoneForWa=(raw:unknown)=>{let d=String(raw||'').replace(/\D/g,'');if(!d)return '';if((d.length===10||d.length===11)&&!d.startsWith('55'))d='55'+d;return d}
 
+export async function GET(req:Request){
+ try{
+  const companyId=await ensureDb(),sql=getDb(),workOrderId=new URL(req.url).searchParams.get('workOrderId')||''
+  if(!workOrderId)return NextResponse.json({error:'OS obrigatória'},{status:400})
+  const rows=await sql`select id,status,amount,due_date,public_token from financial_entries where company_id=${companyId} and work_order_id=${workOrderId} and entry_type='receivable' limit 1`
+  if(!rows.length)return NextResponse.json({exists:false,status:'none',amount:0})
+  const x:any=rows[0]
+  return NextResponse.json({exists:true,status:String(x.status||'pending'),amount:Number(x.amount||0),dueDate:x.due_date||null,hasLink:!!x.public_token})
+ }catch{return NextResponse.json({error:'Erro ao consultar cobrança'},{status:500})}
+}
+
 export async function POST(req:Request){
  try{
   const companyId=await ensureDb(),sql=getDb(),b=await req.json(),workOrderId=String(b.workOrderId||'')

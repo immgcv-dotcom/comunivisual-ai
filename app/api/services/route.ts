@@ -28,11 +28,17 @@ export async function POST(req:Request){
   const seq=await sql`select coalesce(max(nullif(regexp_replace(code,'\\D','','g'),'')::int),1250)+1 n from work_orders where company_id=${companyId}`
   const code='OS-'+seq[0].n
   const stage='Atendimento'
-  const total=0
+  const totalRaw=body.total===''||body.total==null?0:Number(body.total)
+  if(!Number.isFinite(totalRaw)||totalRaw<0) return NextResponse.json({error:'Valor estimado inválido'},{status:400})
+  const total=totalRaw
   let due:string|null=null
   if(body.due){
-   const d=String(body.due)
-   if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(d)||Number.isNaN(new Date(d+'T12:00:00').getTime())) return NextResponse.json({error:'Data de entrega inválida'},{status:400})
+   const d=String(body.due).trim()
+   const match=d.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+   if(!match) return NextResponse.json({error:'Data de entrega inválida'},{status:400})
+   const year=Number(match[1]),month=Number(match[2]),day=Number(match[3])
+   const parsed=new Date(Date.UTC(year,month-1,day))
+   if(parsed.getUTCFullYear()!==year||parsed.getUTCMonth()!==month-1||parsed.getUTCDate()!==day) return NextResponse.json({error:'Data de entrega inválida'},{status:400})
    due=d
   }
   const rows=await sql`insert into work_orders(company_id,client_id,code,title,stage,total,due_date) values(${companyId},${clientId},${code},${body.title.trim()},${stage},${total},${due}) returning *`

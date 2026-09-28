@@ -37,14 +37,7 @@ type Service = {
 
 const stages: BoardStage[] = ['Atendimento', 'Orçamento', 'Aprovado', 'Arte', 'Produção', 'Instalação', 'Concluído']
 
-const initialServices: Service[] = [
-  { id:'OS-1254', client:'Mercado São Lucas', title:'Fachada ACM + letras caixa', value:4950, stage:'Produção', due:'04/10', progress:68, color:'#2f6fed' },
-  { id:'OS-1255', client:'João Auto Peças', title:'Adesivagem de veículo', value:1850, stage:'Arte', due:'03/10', progress:32, color:'#8b5cf6' },
-  { id:'OS-1256', client:'Farmácia Central', title:'Totem + fachada iluminada', value:8900, stage:'Orçamento', due:'07/10', progress:10, color:'#f59e0b' },
-  { id:'OS-1251', client:'Atacadão do Vale', title:'Placas de sinalização', value:3200, stage:'Aprovado', due:'02/10', progress:18, color:'#06b6d4' },
-  { id:'OS-1248', client:'Clínica Vitta', title:'Letreiro acrílico retroiluminado', value:2780, stage:'Instalação', due:'28/09', progress:88, color:'#10b981' },
-  { id:'OS-1239', client:'Padaria Imperial', title:'Painel + adesivos de vitrine', value:2380, stage:'Concluído', due:'26/09', progress:100, color:'#64748b' }
-]
+const initialServices: Service[] = []
 
 const money = (v:number) => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
 
@@ -52,7 +45,7 @@ export default function Home(){
   const [section,setSection]=useState<'services'|'pcp'|'clients'|'finance'|'catalog'|'stock'|'brand'>('services')
   const [filter,setFilter]=useState<'Todos'|Stage>('Todos')
   const [services,setServices]=useState(initialServices)
-  const [selected,setSelected]=useState<Service|null>(initialServices[0])
+  const [selected,setSelected]=useState<Service|null>(null)
   const [brand,setBrand]=useState({name:'ComuniVisual AI', primary:'#3157ff', accent:'#16c79a', logoText:'CV'})
   const [draftBrand,setDraftBrand]=useState(brand)
   const [companyInfo,setCompanyInfo]=useState({document:'',legalName:'',tradeName:'',stateRegistration:'',postalCode:'',street:'',number:'',complement:'',district:'',city:'',state:'',phone:'',whatsapp:'',email:'',logoUrl:''})

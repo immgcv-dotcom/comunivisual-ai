@@ -317,3 +317,147 @@ html,body{background:var(--cv-bg)!important}body{font-family:Inter,ui-sans-serif
 .invoiceFinanceCreated{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 13px;padding:11px 13px;border:1px solid #cfeedd;border-radius:11px;background:#effaf5;color:#147a58}.invoiceFinanceCreated b{font-size:8px}.invoiceFinanceCreated span{font-size:8px;color:#4b806d}
 .paymentMethodSelect{min-width:120px;max-width:155px;min-height:32px!important;padding:0 8px!important;border:1px solid #e1e6ed!important;border-radius:9px!important;background:#fff!important;font-size:7px!important;color:#616d81!important}.txDescription{min-width:150px}.txDescription small{display:block;margin-top:3px;font-size:6px;color:#9ba4b3}
 @media(max-width:760px){.invoicePaymentBox,.stockPurchaseBox{grid-template-columns:1fr}.invoicePaymentBox label,.stockPurchaseBox label,.stockPurchaseBox label:last-child,.stockPurchaseBox>b,.stockPurchaseBox>small{grid-column:1}.paymentMethodSelect{max-width:none;width:100%}}
+
+
+/* =========================================================
+   Legibilidade Premium — escala tipográfica confortável
+   ========================================================= */
+body{font-size:14px!important;line-height:1.5!important}
+.appHeader{min-height:116px!important}
+.pageEyebrow{font-size:10px!important;letter-spacing:.14em!important}
+.appHeader h1{font-size:30px!important;line-height:1.15!important}
+.appHeader p{font-size:14px!important;line-height:1.5!important}
+.headerGhost,.primary,.action,.ghost,.danger{font-size:13px!important;min-height:42px!important}
+.dbBadge{font-size:11px!important}
+.globalSearch{height:44px!important}
+.globalSearch input{font-size:14px!important}
+.globalSearch input::placeholder,input::placeholder,textarea::placeholder{font-size:14px!important;color:#9aa4b5!important;opacity:1!important}
+
+.sidebarLabeled .brandBlock strong{font-size:14px!important}
+.sidebarLabeled .brandBlock span{font-size:11px!important}
+.sidebarLabeled nav button,.sidebarLabeled .sidebarBottom>button{font-size:13px!important;min-height:46px!important}
+.sidebarLabeled .navIcon{font-size:14px!important}
+.sidebarLabeled .user b{font-size:12px!important}
+.sidebarLabeled .user small{font-size:10px!important}
+
+.panelTitle h3,.clientEditor h3,.catalogEditor h3,.stockEditor h3,.pricingPanel h3{font-size:18px!important;line-height:1.25!important}
+.panelTitle p,.clientEditor p,.catalogEditor p,.stockEditor p{font-size:13px!important;line-height:1.5!important}
+label{font-size:13px!important;font-weight:700!important;line-height:1.35!important;color:#4f5c72!important}
+input,select,textarea,.clientSearch{font-size:14px!important;line-height:1.35!important}
+input,select,.clientSearch{min-height:46px!important}
+textarea{min-height:92px!important;padding-top:12px!important}
+.clientGrid,.companyFiscalGrid,.pricingGrid{gap:16px 14px!important}
+.clientGrid label,.companyFiscalGrid label,.pricingGrid label{gap:8px!important}
+.clientType{min-height:48px!important}
+.clientType button,.filters button,.viewSwitch button,.financeFilters button{font-size:12px!important;min-height:38px!important;padding:0 12px!important}
+.clientMsg,.pricingMsg,.taskHint,.emptyClients,.emptyStage{font-size:13px!important;line-height:1.45!important}
+.clientMsg{padding:11px 13px!important}
+
+.overviewTop h2{font-size:23px!important}
+.overviewTop p{font-size:13px!important}
+.heroKicker{font-size:10px!important}
+.overviewFlow span{font-size:12px!important}
+.overviewFlow b{font-size:25px!important}
+.overviewRing>span{font-size:13px!important}
+.overviewRing p{font-size:12px!important}
+.ringVisual small{font-size:11px!important}
+
+.chartTitle b{font-size:15px!important}
+.chartTitle span{font-size:12px!important}
+.chartTitle small{font-size:11px!important}
+.financeStat span{font-size:11px!important}
+.financeStat b{font-size:18px!important}
+.cashRow{grid-template-columns:78px minmax(90px,1fr) 112px!important;gap:10px!important}
+.cashRow>span{font-size:11px!important}
+.cashRow b{font-size:11px!important}
+.stageBar b{font-size:12px!important}
+.stageBar span{font-size:10px!important}
+.stockKpis span{font-size:11px!important}
+.stockKpis b{font-size:17px!important}
+
+.metric span{font-size:12px!important}
+.metric b{font-size:26px!important}
+.metric small{font-size:11px!important;line-height:1.4!important}
+.quickActions b{font-size:13px!important}
+.quickActions small{font-size:11px!important;line-height:1.4!important}
+.quickActions button{min-height:86px!important}
+
+.kanbanHead b{font-size:12px!important}
+.kanbanHead small{font-size:10px!important}
+.kanbanHead span{font-size:11px!important}
+.kanbanCard,.serviceCard,.pcpCard{font-size:13px!important}
+.serviceCard h3,.kanbanCard h3,.pcpCard>b{font-size:14px!important;line-height:1.35!important}
+.serviceCard p,.kanbanCard p,.pcpCard>span,.pcpCard>em{font-size:12px!important;line-height:1.45!important}
+.cardMeta,.cardFoot,.cardSignals{font-size:11px!important}
+.pcpSummary span,.financeCards span{font-size:12px!important}
+.pcpSummary b,.financeCards b{font-size:20px!important}
+.pcpSimple .pcpColumn>header b{font-size:13px!important}
+.pcpSimple .pcpColumn>header span{font-size:12px!important}
+.pcpSimple .pcpCard>small{font-size:11px!important}
+.pcpSimple .pcpCard>em{font-size:11px!important}
+.pcpSimple .pcpCard strong{font-size:11px!important}
+.pcpResponsible{font-size:13px!important}
+
+.financeHero>div>span,.financeHero small,.financeHeroRight span{font-size:12px!important}
+.financeHeroRight b{font-size:17px!important}
+.transaction{font-size:13px!important;min-height:62px!important}
+.transaction b{font-size:13px!important}
+.transaction span{font-size:12px!important}
+.financeDue{font-size:11px!important}
+.financeStatus,.financeDelete{font-size:11px!important;min-height:34px!important}
+.paymentMethodSelect{font-size:12px!important;min-height:36px!important;min-width:145px!important}
+.txDescription small{font-size:10px!important}
+.financeNewGrid{gap:10px!important}
+
+.clientRow,.stockRow,.catalogRow{min-height:66px!important}
+.clientRow b,.stockRow b,.catalogRow b{font-size:13px!important}
+.clientRow small,.stockRow small,.catalogRow small{font-size:11px!important;line-height:1.45!important}
+.clientRow strong,.stockRow strong,.catalogRow strong{font-size:13px!important}
+
+.invoicePaymentBox label,.stockPurchaseBox label{font-size:12px!important}
+.invoicePaymentBox select,.invoicePaymentBox input,.stockPurchaseBox select,.stockPurchaseBox input{font-size:13px!important;min-height:43px!important}
+.stockPurchaseBox>b{font-size:13px!important}
+.stockPurchaseBox>small{font-size:11px!important}
+.invoiceFinanceCreated b{font-size:12px!important}
+.invoiceFinanceCreated span{font-size:11px!important}
+.invoiceHead b{font-size:14px!important}
+.invoiceHead span{font-size:12px!important}
+.invoiceItem b{font-size:13px!important}
+.invoiceItem small,.invoiceItem strong{font-size:11px!important}
+.invoicePaste summary{font-size:12px!important}
+.invoiceFilePicker b{font-size:13px!important}
+.invoiceFilePicker small{font-size:11px!important}
+
+.drawerHead h2{font-size:23px!important}
+.drawerHead p,.drawerHead span{font-size:12px!important}
+.osSectionLabel span{font-size:11px!important}
+.osSectionLabel small{font-size:11px!important}
+.osTabs button{font-size:12px!important}
+.osTabs button em{font-size:10px!important}
+.detailBlock h4{font-size:15px!important}
+.detailBlock p,.detailBlock span,.detailBlock small{font-size:12px!important}
+.drawerValue span{font-size:12px!important}
+.drawerValue b{font-size:22px!important}
+
+.modal>.eyebrow{font-size:10px!important}
+.modal>h2{font-size:25px!important}
+.modal>p{font-size:13px!important}
+.modal label{font-size:13px!important}
+.modal input,.modal select{font-size:14px!important;min-height:46px!important}
+.newOsSteps span,.newOsSteps span b{font-size:11px!important}
+.modalSubmit{font-size:14px!important}
+
+@media(max-width:900px){
+  .appHeader h1{font-size:27px!important}
+  .appHeader p{font-size:13px!important}
+  .sidebarLabeled nav button{font-size:12px!important}
+}
+@media(max-width:650px){
+  body{font-size:14px!important}
+  .metrics{grid-template-columns:1fr!important}
+  .quickActions{grid-template-columns:1fr 1fr!important}
+  .cashRow{grid-template-columns:68px 1fr!important}
+  .cashRow b{grid-column:2;text-align:left!important}
+  label{font-size:13px!important}
+  input,select,textarea{font-size:16px!important}
+}

@@ -601,3 +601,22 @@ textarea{min-height:92px!important;padding-top:12px!important}
   .metric{min-height:108px!important}
   .metric>b{font-size:26px!important}
 }
+
+
+/* Ajuste final dos KPIs financeiros — valores completos dentro do card */
+.metrics .metricValue>b,
+.metrics .metricDone>b{
+  font-size:clamp(18px,1.25vw,21px)!important;
+  letter-spacing:-.05em!important;
+  white-space:nowrap!important;
+  max-width:100%!important;
+}
+.metrics .metricActive>b,
+.metrics .metricProduction>b{
+  font-size:25px!important;
+}
+@media(max-width:1050px) and (min-width:681px){
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .metrics .metricValue>b,
+  .metrics .metricDone>b{font-size:24px!important}
+}

@@ -103,14 +103,17 @@ export async function PATCH(req:Request){
   if(!currentRows.length)return NextResponse.json({error:'OS não encontrada'},{status:404})
   const current=String(currentRows[0].stage),next=String(b.stage)
   if(current==='Cancelado'&&next!=='Cancelado')return NextResponse.json({error:'OS cancelada está arquivada.'},{status:409})
-  if(current==='Concluído'&&next!=='Concluído')return NextResponse.json({error:'OS concluída não pode voltar de etapa.'},{status:409})
+  if(current==='Concluído'&&!['Concluído','Produção'].includes(next))return NextResponse.json({error:'Uma OS concluída só pode ser reaberta para Produção.'},{status:409})
   if(current===next)return NextResponse.json(currentRows[0])
   if(next!=='Cancelado'){
-   const ci=flow.indexOf(current as any),ni=flow.indexOf(next as any)
-   if(ci<0||ni!==ci+1)return NextResponse.json({error:'Avance a OS uma etapa por vez.'},{status:409})
+   const reopening=current==='Concluído'&&next==='Produção'
+   if(!reopening){
+    const ci=flow.indexOf(current as any),ni=flow.indexOf(next as any)
+    if(ci<0||ni!==ci+1)return NextResponse.json({error:'Avance a OS uma etapa por vez.'},{status:409})
+   }
   }
 
-  const rows=await sql`update work_orders set stage=${next},approved_at=case when ${next}='Aprovado' then coalesce(approved_at,now()) else approved_at end,installed_at=case when ${next}='Concluído' then coalesce(installed_at,now()) else installed_at end where id=${b.id} and company_id=${companyId} returning *`
+  const rows=await sql`update work_orders set stage=${next},approved_at=case when ${next}='Aprovado' then coalesce(approved_at,now()) else approved_at end,installed_at=case when ${next}='Concluído' then coalesce(installed_at,now()) when ${current}='Concluído' and ${next}='Produção' then null else installed_at end where id=${b.id} and company_id=${companyId} returning *`
   if(rows.length)await sql`insert into work_order_events(company_id,work_order_id,event_type,title,detail) values(${companyId},${b.id},'stage','Etapa alterada',${current+' → '+next})`
 
   if(rows.length&&next==='Aprovado'){

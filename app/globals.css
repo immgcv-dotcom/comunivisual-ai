@@ -668,3 +668,25 @@ textarea{min-height:92px!important;padding-top:12px!important}
  .simpleSummaryCard{grid-template-columns:1fr}
  .simpleNextAction{align-items:flex-start;flex-direction:column}.simpleNextAction .primary{width:100%}
 }
+
+
+/* OS final: somente as 4 etapas */
+.stageOnlyDrawer{width:min(760px,96vw)!important;padding:26px!important;background:#f6f8fb!important}
+.stageOnlyHead{padding:5px 4px 18px}.stageOnlyHead h2{margin:5px 0 4px!important;font-size:25px!important;line-height:1.15!important}.stageOnlyHead p{margin:0!important;font-size:13px!important;color:#778196!important}
+.stageOnlyFlow{display:grid;gap:11px}
+.stageOnlyCard{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:14px;min-height:96px;padding:16px;border:1px solid #e3e7ed;border-radius:15px;background:#fff;box-shadow:0 5px 16px rgba(30,42,68,.035)}
+.stageOnlyCard.current{border-color:#cfd5ff;box-shadow:0 8px 24px rgba(74,83,220,.09)}
+.stageOnlyCard.done:not(.current){opacity:.72}
+.stageOnlyNumber{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#eef1f6;color:#7c8799;font-size:14px;font-weight:850}
+.stageOnlyCard.current .stageOnlyNumber{background:var(--primary);color:#fff}.stageOnlyCard.done .stageOnlyNumber{background:#ecf8f2;color:#15815b}
+.stageOnlyText{display:grid;gap:3px;min-width:0}.stageOnlyText>span{font-size:9px;font-weight:850;letter-spacing:.12em;color:#9aa3b2}.stageOnlyText>b{font-size:17px;color:#202b3e}.stageOnlyText>small{max-width:390px;font-size:10px;line-height:1.4;color:#8a94a5}
+.stageOnlyCard>.primary,.stageOnlyActions .primary,.whatsappCharge{min-height:42px!important;padding:0 14px!important;border-radius:10px!important;font-size:11px!important;font-weight:800!important;white-space:nowrap}
+.stageOnlyActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.whatsappCharge{border:1px solid #bde5d2;background:#edf9f3;color:#12815a;cursor:pointer}
+.stageDoneLabel{padding:9px 13px;border-radius:999px;background:#ecf8f2;color:#15815b;font-size:11px}
+@media(max-width:720px){
+ .stageOnlyDrawer{padding:18px!important}
+ .stageOnlyCard{grid-template-columns:42px 1fr}
+ .stageOnlyCard>.primary,.stageOnlyActions,.stageDoneLabel{grid-column:1/-1;width:100%}
+ .stageOnlyActions{justify-content:stretch}.stageOnlyActions button{width:100%}
+}

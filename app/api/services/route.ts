@@ -91,7 +91,7 @@ export async function PATCH(req:Request){
 
   if(rows.length&&next==='Aprovado'){
    const w=rows[0]
-   await sql`insert into financial_entries(company_id,work_order_id,entry_type,description,amount,due_date,status) values(${companyId},${w.id},'receivable',${'Recebimento '+w.code+' — '+w.title},${w.total},${w.due_date},'pending') on conflict (work_order_id,entry_type) where work_order_id is not null and entry_type='receivable' do update set amount=excluded.amount,due_date=excluded.due_date,description=excluded.description`
+   await sql`insert into financial_entries(company_id,work_order_id,entry_type,description,amount,due_date,status,public_token) values(${companyId},${w.id},'receivable',${'Cobrança '+w.code+' — '+w.title},${w.total},${w.due_date},'pending',gen_random_uuid()) on conflict (work_order_id,entry_type) where work_order_id is not null and entry_type='receivable' do update set amount=excluded.amount,due_date=excluded.due_date,description=excluded.description,public_token=coalesce(financial_entries.public_token,gen_random_uuid())`
   }
 
   if(rows.length&&next==='Concluído'){

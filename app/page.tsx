@@ -161,7 +161,7 @@ export default function Home(){
   const financeScale=Math.max(1,pendingReceivables,paidReceivables,pendingPayables,paidPayables)
   const lowStockNow=materials.filter((m:any)=>Number(m.stock_quantity)<=Number(m.min_stock)).length
 
-  function openService(s:Service){setSelected(s);setOsTab('summary');setQuoteDetails({validUntil:s.quoteValidUntil||'',paymentTerms:s.paymentTerms||'',notes:s.quoteNotes||'',discount:String(s.discount||0)});setCostInputs({productionHours:String(s.productionHours||0),installationHours:String(s.installationHours||0),machineHours:String(s.machineHours||0),travelKm:String(s.travelKm||0)});setInstallationForm({scheduledAt:s.installationScheduledAt?s.installationScheduledAt.slice(0,16):'',team:s.installationTeam||'',address:s.installationAddress||'',notes:s.installationNotes||''});setInstallationMsg('');setQuoteMsg('');setArtworkMsg('');setOsMsg('');loadQuoteItems(s);loadTasks(s);loadMaterials(s);loadArtworks(s);loadEvents(s);loadOsResult(s)}
+  function openService(s:Service){setSelected(s);setOsMsg('')}
 
   async function setStage(s:Service,next:Stage){
     if(s.stage===next) return
@@ -323,88 +323,38 @@ export default function Home(){
     </main>
 
     {selected && section==='services' && <div className="drawerOverlay" onClick={()=>setSelected(null)}>
-      <aside className="drawer simpleOsDrawer" onClick={e=>e.stopPropagation()}>
+      <aside className="drawer stageOnlyDrawer" onClick={e=>e.stopPropagation()}>
         <button className="close" onClick={()=>setSelected(null)}>×</button>
-        <div className="simpleOsHead">
-          <div><span className="eyebrow">{selected.id}</span><h2>{selected.client}</h2><p>{selected.title}</p></div>
-          <span className="simpleStageBadge">{selected.stage}</span>
+        <div className="stageOnlyHead">
+          <span className="eyebrow">{selected.id}</span>
+          <h2>{selected.client}</h2>
+          <p>{selected.title} · {money(selected.value)}</p>
         </div>
-
         {osMsg&&<div className="osAlert">{osMsg}</div>}
-
-        <div className="simpleOsFacts">
-          <div><span>Valor</span><b>{money(selected.value)}</b></div>
-          <div><span>Entrega</span><b>{selected.due||'Sem prazo'}</b></div>
-          <div><span>Etapa</span><b>{selected.stage}</b></div>
-        </div>
-
-        <div className="simpleProgress">
-          {stages.map((stage,index)=>{const current=stages.indexOf(selected.stage as BoardStage);return <div key={stage} className={index<current?'done':index===current?'active done':''}><i/><span>{stage}</span></div>})}
-        </div>
-
-        <div className="simpleOsTabs">
-          <button className={osTab==='summary'?'active':''} onClick={()=>setOsTab('summary')}>Resumo</button>
-          <button className={osTab==='quote'?'active':''} onClick={()=>setOsTab('quote')}>Orçamento</button>
-          <button className={osTab==='production'?'active':''} onClick={()=>setOsTab('production')}>Execução</button>
-          <button className={osTab==='history'?'active':''} onClick={()=>setOsTab('history')}>Histórico</button>
-        </div>
-
-        {osTab==='summary'&&<div className="simpleSummary">
-          <div className="simpleSummaryCard">
-            <div><span>Cliente</span><b>{selected.client}</b></div>
-            <div><span>Serviço</span><b>{selected.title}</b></div>
-            <div><span>Valor da OS</span><b>{money(selected.value)}</b></div>
-            <div><span>Prazo</span><b>{selected.due||'Não informado'}</b></div>
-          </div>
-          <div className="simpleNextAction">
-            <div><span>Próximo passo</span><b>{selected.stage==='Orçamento'?'Aprovar orçamento':selected.stage==='Aprovado'?'Enviar para produção':selected.stage==='Produção'?'Concluir serviço':selected.stage==='Concluído'?'OS finalizada':'OS cancelada'}</b></div>
-            {!['Concluído','Cancelado'].includes(selected.stage)&&<button className="primary" onClick={()=>moveStage(selected,1)}>Avançar →</button>}
-          </div>
-          <div className="simpleSecondaryActions">
-            <button onClick={()=>setOsTab('quote')}>Abrir orçamento</button>
-            <button onClick={()=>setOsTab('history')}>Ver histórico</button>
-            {!['Concluído','Cancelado'].includes(selected.stage)&&<button className="dangerText" onClick={async()=>{if(!selected?.dbId)return;if(!window.confirm('Cancelar esta OS?'))return;await setStage(selected,'Cancelado');setSelected(null)}}>Cancelar OS</button>}
-          </div>
-        </div>}
-
-        {osTab==='quote'&&<div className="simpleTabContent">
-          <div className="simpleSectionTitle"><div><h3>Orçamento</h3><p>Itens, valor e condição de pagamento.</p></div><strong>{money(selected.value)}</strong></div>
-          <div className="quoteForm simpleQuoteForm">
-            <input placeholder="Descrição do item" value={quoteItem.description} onChange={e=>setQuoteItem({...quoteItem,description:e.target.value})}/>
-            <div>
-              <input type="number" min="0" step="0.01" placeholder="Qtd." value={quoteItem.quantity} onChange={e=>setQuoteItem({...quoteItem,quantity:e.target.value})}/>
-              <select value={quoteItem.unit} onChange={e=>setQuoteItem({...quoteItem,unit:e.target.value})}>{cvUnits.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select>
-              <input type="number" min="0" step="0.01" placeholder="Valor unit." value={quoteItem.unitPrice} onChange={e=>setQuoteItem({...quoteItem,unitPrice:e.target.value})}/>
+        <div className="stageOnlyFlow">
+          {stages.map((stage,index)=>{
+            const currentIndex=stages.indexOf(selected.stage as BoardStage)
+            const done=currentIndex>index||selected.stage==='Concluído'
+            const current=selected.stage===stage
+            return <div key={stage} className={'stageOnlyCard '+(current?'current ':'')+(done?'done':'')}>
+              <div className="stageOnlyNumber">{index+1}</div>
+              <div className="stageOnlyText"><span>ETAPA</span><b>{stage}</b>
+                {stage==='Aprovado'&&<small>Cobrança criada automaticamente e mantida no Financeiro até você dar baixa.</small>}
+              </div>
+              {current&&stage==='Orçamento'&&<button className="primary" onClick={()=>moveStage(selected,1)}>Aprovar e gerar cobrança →</button>}
+              {current&&stage==='Aprovado'&&<div className="stageOnlyActions"><button className="whatsappCharge" onClick={async()=>{
+                if(!selected?.dbId)return;
+                const r=await fetch('/api/charge-share',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workOrderId:selected.dbId})});
+                const x=await r.json().catch(()=>({}));
+                if(!r.ok){setOsMsg(x.error||'Não foi possível gerar a cobrança.');return}
+                if(x.status==='paid'){setOsMsg('Esta cobrança já foi baixada como paga no Financeiro.');return}
+                window.open(x.waUrl||x.url,'_blank')
+              }}>Enviar cobrança no WhatsApp</button><button className="primary" onClick={()=>moveStage(selected,1)}>Enviar para produção →</button></div>}
+              {current&&stage==='Produção'&&<button className="primary" onClick={()=>moveStage(selected,1)}>Concluir OS →</button>}
+              {current&&stage==='Concluído'&&<strong className="stageDoneLabel">Concluído</strong>}
             </div>
-            <button className="action" onClick={addQuoteItem}>+ Adicionar item</button>
-          </div>
-          <div className="simpleQuoteLines">{quoteItems.length===0?<div className="simpleEmpty">Nenhum item no orçamento.</div>:quoteItems.map(x=><div className="quoteLine" key={x.id}><div><b>{x.description}</b><span>{Number(x.quantity)} {x.unit} × {money(Number(x.unit_price))}</span></div><strong>{money(Number(x.quantity)*Number(x.unit_price))}</strong><button onClick={()=>removeQuoteItem(x.id)}>×</button></div>)}</div>
-          <div className="simpleQuoteSettings">
-            <label>Condição de pagamento<input placeholder="Ex.: 50% entrada + 50% na entrega" value={quoteDetails.paymentTerms} onChange={e=>setQuoteDetails({...quoteDetails,paymentTerms:e.target.value})}/></label>
-            <label>Observação<textarea rows={2} value={quoteDetails.notes} onChange={e=>setQuoteDetails({...quoteDetails,notes:e.target.value})}/></label>
-          </div>
-          <div className="simpleButtonRow">
-            <button className="primary" onClick={saveQuoteDetails}>Salvar orçamento</button>
-            <button onClick={()=>selected?.dbId&&window.open('/api/quote-print?id='+selected.dbId,'_blank')}>Gerar PDF</button>
-            <button onClick={shareQuoteWhatsApp}>WhatsApp</button>
-          </div>
-          {quoteMsg&&<span className="quoteMsg">{quoteMsg}</span>}
-        </div>}
-
-        {osTab==='production'&&<div className="simpleTabContent">
-          <div className="simpleSectionTitle"><div><h3>Andamento</h3><p>Sem subetapas: avance somente entre as quatro etapas principais.</p></div><span className="simpleStageBadge">{selected.stage}</span></div>
-          <div className="simpleExecutionBlock">
-            <span>Etapa atual</span>
-            <b>{selected.stage}</b>
-            {!['Concluído','Cancelado'].includes(selected.stage)&&<button className="primary" onClick={()=>moveStage(selected,1)}>Avançar para {selected.stage==='Orçamento'?'Aprovado':selected.stage==='Aprovado'?'Produção':'Concluído'} →</button>}
-          </div>
-        </div>}
-
-        {osTab==='history'&&<div className="simpleTabContent">
-          <div className="simpleSectionTitle"><div><h3>Histórico</h3><p>Observações e movimentações da OS.</p></div></div>
-          <div className="eventComposer simpleEventComposer"><textarea rows={2} value={eventNote} onChange={e=>setEventNote(e.target.value)} placeholder="Adicionar observação..."/><button className="action" onClick={addEvent}>Registrar</button></div>
-          <div className="simpleHistory">{events.length===0?<div className="simpleEmpty">Nenhum registro ainda.</div>:events.map((e:any)=><div className="eventLine" key={e.id}><i></i><div><b>{e.title}</b><span>{e.detail||'Sem detalhes'}</span><small>{new Date(e.created_at).toLocaleString('pt-BR')}</small></div></div>)}</div>
-        </div>}
+          })}
+        </div>
       </aside>
     </div>}
 

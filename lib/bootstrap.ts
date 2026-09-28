@@ -40,7 +40,10 @@ export async function ensureSchema(){
   await sql`alter table financial_entries add column if not exists payment_method text`
   await sql`alter table financial_entries add column if not exists source_type text`
   await sql`alter table financial_entries add column if not exists source_id text`
+  await sql`alter table financial_entries add column if not exists public_token uuid`
+  await sql`alter table financial_entries add column if not exists charge_sent_at timestamptz`
   await sql`create unique index if not exists financial_source_uidx on financial_entries(company_id,source_type,source_id,entry_type) where source_id is not null`
+  await sql`create unique index if not exists financial_entries_public_token_uidx on financial_entries(public_token) where public_token is not null`
   let companies=await sql`select id from companies where slug=${configuredSlug} limit 1`
   if(!companies.length){ await sql`insert into companies(name,slug) values (${configuredName},${configuredSlug}) on conflict(slug) do nothing`; companies=await sql`select id from companies where slug=${configuredSlug} limit 1` }
   return companies[0].id as string
@@ -134,7 +137,10 @@ export async function ensureSchema(){
  await sql`alter table financial_entries add column if not exists payment_method text`
  await sql`alter table financial_entries add column if not exists source_type text`
  await sql`alter table financial_entries add column if not exists source_id text`
+ await sql`alter table financial_entries add column if not exists public_token uuid`
+ await sql`alter table financial_entries add column if not exists charge_sent_at timestamptz`
  await sql`create unique index if not exists financial_source_uidx on financial_entries(company_id,source_type,source_id,entry_type) where source_id is not null`
+ await sql`create unique index if not exists financial_entries_public_token_uidx on financial_entries(public_token) where public_token is not null`
  let companies=await sql`select id from companies where slug=${configuredSlug} limit 1`
  if(!companies.length){ await sql`insert into companies(name,slug) values (${configuredName},${configuredSlug}) on conflict(slug) do nothing`; companies=await sql`select id from companies where slug=${configuredSlug} limit 1` }
  const companyId=companies[0].id as string

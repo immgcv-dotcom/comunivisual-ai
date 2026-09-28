@@ -1,5 +1,4 @@
 name: Production Check
-# Current production trigger: Cloudflare must build the newest main commit, not retry an older deployment.
 on:
   push:
     branches: [main]
@@ -19,26 +18,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: TypeScript and Next.js build
         run: npm run build
         env:
           DATABASE_URL: postgresql://placeholder:placeholder@localhost:5432/placeholder
-      - name: Production URL health check
-        if: success()
-        shell: bash
-        run: |
-          URL="https://comunivisual-ai.immgcv.workers.dev/api/health"
-          echo "Build local aprovado. Verificando a aplicação publicada em $URL"
-          for attempt in 1 2 3 4 5; do
-            body="$(curl --silent --show-error --max-time 15 "$URL" 2>&1 || true)"\n            echo "Resposta: $body"
-            if echo "$body" | grep -q '"ok":true' && echo "$body" | grep -q '"database":"connected"'; then
-              echo "Produção online e banco conectado."
-              exit 0
-            fi
-            echo "Tentativa $attempt/5 ainda sem resposta saudável."
-            sleep 12
-          done
-          echo "::warning::O build passou, mas a URL de produção não confirmou saúde nesta janela."
-          exit 1

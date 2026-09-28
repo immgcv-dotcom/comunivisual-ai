@@ -229,3 +229,24 @@ header{position:relative}.headerActions{align-items:center}.globalSearch{transit
 
 /* Contextual OS navigation */
 .osSectionLabel{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:22px 2px 8px}.osSectionLabel span{font-size:8px;font-weight:850;letter-spacing:.14em;color:#56647d}.osSectionLabel small{font-size:8px;color:#9aa5b6;text-align:right}.osTabs button em{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:5px;padding:0 5px;border-radius:99px;background:#e8edf5;color:#647189;font-style:normal;font-size:7px}.osTabs button.active em{background:color-mix(in srgb,var(--primary) 12%,#fff);color:var(--primary)}
+
+
+/* 2026 dashboard visual refresh — referência clean, branca e violeta */
+:root{--primary:#7546f5!important;--accent:#8b5cf6!important}
+body{background:#e7ebf2!important;color:#17182b!important}
+.app{max-width:1460px;margin:34px auto;min-height:calc(100vh - 68px);grid-template-columns:92px 1fr;background:#f8f9fc;box-shadow:0 22px 70px rgba(36,42,67,.13);overflow:hidden}
+.sidebar{width:92px!important;margin:0!important;padding:27px 13px!important;background:linear-gradient(180deg,#8547f5 0%,#6749f5 100%)!important;border:0!important;box-shadow:none!important}
+.brandBlock{padding:0 0 26px!important;justify-content:center}.brandText{display:none!important}.brandLogo{width:48px!important;height:48px!important;border-radius:14px!important;background:#fff!important;color:#7546f5!important;box-shadow:none!important}
+.sidebar nav{gap:11px!important}.sidebar nav button,.sidebarBottom>button{justify-content:center!important;width:54px!important;min-height:48px!important;margin:auto!important;padding:0!important;border-radius:10px!important;color:transparent!important;font-size:0!important}.sidebar nav button.active{background:rgba(73,30,204,.23)!important;box-shadow:none!important}.navIcon{width:32px!important;height:32px!important;flex-basis:32px!important;background:transparent!important;color:#fff!important;font-size:17px!important}.sidebar button.active .navIcon{background:transparent!important;box-shadow:none!important}
+.sidebarBottom{margin-top:auto!important;border:0!important;padding:15px 0 0!important}.sidebarBottom .user{display:none!important}
+main{padding:30px 34px 55px!important;background:#f8f9fc!important}header{margin-bottom:26px!important}header h1{font-size:24px!important;color:#17182b!important}.pageEyebrow{color:#7546f5!important}
+.globalSearch{background:#fff!important;border:0!important;box-shadow:0 5px 16px rgba(38,43,68,.04)!important}
+.primary{background:linear-gradient(135deg,#8647f5,#6449f5)!important;border:0!important;box-shadow:0 8px 18px rgba(112,70,244,.22)!important}
+.metrics{gap:22px!important}.metric{min-height:110px!important;border:0!important;border-radius:15px!important;color:#fff!important;box-shadow:0 13px 26px rgba(55,61,88,.12)!important;overflow:hidden}.metric span,.metric b,.metric small{color:#fff!important}.metric span{opacity:.82!important}.metric small{opacity:.75!important}.metricActive{background:linear-gradient(135deg,#9a78e7,#b499ee)!important}.metricProduction{background:linear-gradient(135deg,#426ed8,#3796f6)!important}.metricValue{background:linear-gradient(135deg,#ff6267,#ff7f83)!important}.metricDone{background:linear-gradient(135deg,#ff934d,#ffad61)!important}.metric:before{background:rgba(255,255,255,.17)!important}.metric:after{display:none!important}
+.dashboardHero{background:#fff!important;color:#17182b!important;box-shadow:0 8px 24px rgba(38,43,68,.055)!important;border-radius:14px!important}.heroKicker{color:#7546f5!important}.heroCopy h2{color:#17182b!important}.heroCopy p{color:#7f8498!important}.heroFlow{background:#fafaff!important;border-color:#eeeefa!important}.heroFlow span{color:#8e93a7!important}.heroFlow b{color:#17182b!important}.heroActions button{color:#5e6478!important;background:#f3f2ff!important;border:0!important}.heroActions .heroPrimary{color:#fff!important;background:linear-gradient(135deg,#8647f5,#6449f5)!important}
+.panel,.serviceList,.invoiceImport,.financeCards>div,.pcpSummary>div,.previewBox{border-radius:14px!important;box-shadow:0 7px 22px rgba(38,43,68,.055)!important}
+.quickActions button{border-radius:13px!important;box-shadow:0 7px 20px rgba(38,43,68,.05)!important}
+.kanbanColumn,.pcpColumn{background:#f0f2f7!important;border-radius:14px!important}.kanbanCard,.pcpCard{border-radius:12px!important}
+.filters button.selected,.clientType button.selected,.financeFilters button.selected{color:#7546f5!important}
+.progress i{background:linear-gradient(90deg,#8647f5,#6449f5)!important}
+@media(max-width:900px){.app{margin:0;min-height:100vh;grid-template-columns:1fr}.sidebar{width:100%!important}.brandText{display:block!important}.sidebar nav button{width:auto!important;font-size:10px!important;color:#fff!important;padding:0 10px!important}.sidebar nav{justify-content:flex-start}main{padding:22px 16px 50px!important}}

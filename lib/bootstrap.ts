@@ -1,6 +1,6 @@
 import { getDb } from './db'
 
-async function ensureAuthSchema(sql:any){
+async function ensureAuthTables(sql:any){
  await sql`alter table companies add column if not exists status text not null default 'active'`
  await sql`alter table companies add column if not exists plan text not null default 'professional'`
  await sql`alter table companies add column if not exists user_limit int not null default 10`
@@ -15,13 +15,28 @@ async function ensureAuthSchema(sql:any){
  await sql`create table if not exists platform_setup_tokens (id uuid primary key default gen_random_uuid(),company_id uuid not null references companies(id) on delete cascade,token_hash text not null unique,expires_at timestamptz not null,used_at timestamptz,created_at timestamptz not null default now())`
 }
 
+export async function ensureAuthSchema(){
+ const sql=getDb()
+ const configuredSlug=(process.env.DEFAULT_COMPANY_SLUG||'immagine').trim().toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'')||'immagine'
+ const configuredName=(process.env.DEFAULT_COMPANY_NAME||'Immagine Comunicação Visual').trim()||'Immagine Comunicação Visual'
+ await sql`create table if not exists companies (id uuid primary key default gen_random_uuid(),name text not null,slug text unique not null,primary_color text not null default '#3157ff',accent_color text not null default '#16c79a',created_at timestamptz not null default now())`
+ await sql`alter table companies add column if not exists created_at timestamptz not null default now()`
+ await ensureAuthTables(sql)
+ let companies=await sql`select id from companies where slug=${configuredSlug} limit 1`
+ if(!companies.length){
+  await sql`insert into companies(name,slug) values(${configuredName},${configuredSlug}) on conflict(slug) do nothing`
+  companies=await sql`select id from companies where slug=${configuredSlug} limit 1`
+ }
+ return String(companies[0].id)
+}
+
 export async function ensureSchema(){
  const sql=getDb()
  const configuredSlug=(process.env.DEFAULT_COMPANY_SLUG||'immagine').trim().toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'')||'immagine'
  const configuredName=(process.env.DEFAULT_COMPANY_NAME||'Immagine Comunicação Visual').trim()||'Immagine Comunicação Visual'
  const ready=await sql`select to_regclass('public.financial_entries') is not null as ready`
  if(ready[0]?.ready){
-  await ensureAuthSchema(sql)
+  await ensureAuthTables(sql)
   await sql`alter table financial_entries add column if not exists payment_method text`
   await sql`alter table financial_entries add column if not exists source_type text`
   await sql`alter table financial_entries add column if not exists source_id text`
@@ -46,7 +61,7 @@ export async function ensureSchema(){
  await sql`alter table companies add column if not exists district text`
  await sql`alter table companies add column if not exists city text`
  await sql`alter table companies add column if not exists state text`
- await ensureAuthSchema(sql)
+ await ensureAuthTables(sql)
  await sql`create table if not exists clients (id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade, name text not null, phone text, whatsapp text, email text, created_at timestamptz not null default now())`
  await sql`alter table clients add column if not exists person_type text not null default 'PJ'`
  await sql`alter table clients add column if not exists document text`
@@ -128,10 +143,8 @@ export async function ensureSchema(){
 
 
 export async function ensureDb(permission?:string){
- const fallbackCompanyId=await ensureSchema()
  const {headers}=await import('next/headers')
  const h=await headers()
- if(h.get('x-public-company-bootstrap')==='1')return fallbackCompanyId
  const forwardedCompany=h.get('x-company-id')
  if(forwardedCompany){
   if(permission&&h.get('x-super-admin')!=='1'){
@@ -139,6 +152,16 @@ export async function ensureDb(permission?:string){
    if(!permissions.includes(permission))throw new Error('FORBIDDEN')
   }
   return forwardedCompany
+ }
+ if(h.get('x-public-company-bootstrap')==='1'){
+  const sql=getDb()
+  const configuredSlug=(process.env.DEFAULT_COMPANY_SLUG||'immagine').trim().toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'')||'immagine'
+  let rows=await sql`select id from companies where slug=${configuredSlug} limit 1`
+  if(!rows.length){
+   const id=await ensureAuthSchema()
+   return id
+  }
+  return String(rows[0].id)
  }
  const {getAuthContext}=await import('./auth')
  const ctx=await getAuthContext()

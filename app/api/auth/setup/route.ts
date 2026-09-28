@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { ensureSchema } from '@/lib/bootstrap'
+import { ensureAuthSchema } from '@/lib/bootstrap'
 import { getDb } from '@/lib/db'
 import { createSessionRecord,hashPassword,hashToken,normalizeEmail,requestMeta,sessionCookieOptions,SESSION_COOKIE } from '@/lib/auth'
 
@@ -17,7 +17,7 @@ async function resolveInitialCompany(sql:any,token:string){
 
 export async function GET(req:Request){
  try{
-  await ensureSchema()
+  await ensureAuthSchema()
   const token=new URL(req.url).searchParams.get('token')||'',sql=getDb()
   const company=await resolveInitialCompany(sql,token)
   return NextResponse.json(company?{valid:true,companyName:company.name}:{valid:false})
@@ -28,7 +28,7 @@ export async function GET(req:Request){
 
 export async function POST(req:Request){
  try{
-  await ensureSchema()
+  await ensureAuthSchema()
   const sql=getDb(),b=await req.json(),token=String(b.token||''),name=String(b.name||'').trim(),email=normalizeEmail(b.email),password=String(b.password||'')
   if(name.length<2||!/^\S+@\S+\.\S+$/.test(email)||password.length<8)return NextResponse.json({error:'Preencha nome, e-mail válido e senha com ao menos 8 caracteres.'},{status:400})
   const company=await resolveInitialCompany(sql,token)

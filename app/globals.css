@@ -1190,3 +1190,45 @@ body{background:var(--app-bg)!important;color:var(--app-ink)!important}
   .orderDangerZone{justify-content:stretch}
   .cancelOrderBtn{width:100%;min-height:44px}
 }
+
+
+/* Cancelamento visível no topo da OS */
+.stageHeaderActions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.cancelOrderTopBtn{
+  min-height:38px;
+  padding:0 13px;
+  border:1px solid #efc7cd;
+  border-radius:10px;
+  background:#fff7f8;
+  color:#b42335;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.cancelOrderTopBtn:hover{background:#fff0f2;border-color:#e7aeb7}
+@media(max-width:760px){
+  .stageHeaderActions{
+    grid-column:1/-1!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    width:100%!important;
+    gap:8px!important
+  }
+  .stageHeaderActions .editOrderBtn,
+  .stageHeaderActions .cancelOrderTopBtn{
+    width:100%!important;
+    min-height:46px!important
+  }
+  .cancelOrderTopBtn{
+    background:#fff3f4!important;
+    border-color:#e8b7bf!important;
+    font-size:12px!important
+  }
+}

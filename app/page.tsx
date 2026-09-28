@@ -185,6 +185,12 @@ export default function Home(){
   async function openOrderEdit(){
     if(selected)await startOrderEdit(selected)
   }
+  async function cancelSelectedOrder(){
+    if(!selected||selected.stage==='Cancelado')return
+    if(!window.confirm('Cancelar '+selected.id+'? O pedido será arquivado. Cobranças pendentes serão canceladas, mas pagamentos já baixados serão preservados.'))return
+    await setStage(selected,'Cancelado')
+    setSelected(null)
+  }
   async function saveOrderEdit(){
     if(!selected?.dbId)return
     if(!orderEdit.clientId){setOsMsg('Selecione o cliente.');return}
@@ -388,14 +394,17 @@ export default function Home(){
         <button className="close" onClick={()=>setSelected(null)}>×</button>
         <div className="stageOnlyHead">
           <div><span className="eyebrow">{selected.id}</span><h2>{selected.client}</h2><p>{selected.title} · {money(selected.value)}</p></div>
-          <button className="editOrderBtn" onClick={openOrderEdit}>Editar pedido</button>
+          <div className="stageHeaderActions">
+            <button className="editOrderBtn" onClick={openOrderEdit}>Editar pedido</button>
+            {selected.stage!=='Cancelado'&&<button className="cancelOrderTopBtn" onClick={cancelSelectedOrder}>Cancelar pedido</button>}
+          </div>
         </div>
         {osMsg&&<div className="osAlert">{osMsg}</div>}
         {editingOrder&&<div className="orderEditPanel">
           <label>Cliente<select value={orderEdit.clientId} onFocus={()=>{if(!clients.length)loadClients()}} onChange={e=>setOrderEdit({...orderEdit,clientId:e.target.value})}><option value="">Selecione o cliente</option>{clients.map((c:any)=><option key={c.id} value={c.id}>{c.trade_name||c.name||c.legal_name}</option>)}</select></label>
           <label>Serviço<input value={orderEdit.title} onChange={e=>setOrderEdit({...orderEdit,title:e.target.value})}/></label>
           <div><label>Valor<input type="number" min="0" step="0.01" value={orderEdit.total} onChange={e=>setOrderEdit({...orderEdit,total:e.target.value})}/></label><label>Prazo<input type="date" value={orderEdit.due} onChange={e=>setOrderEdit({...orderEdit,due:e.target.value})}/></label></div>
-          <div className="orderEditActions"><button onClick={()=>setEditingOrder(false)}>Cancelar</button><button className="primary" onClick={saveOrderEdit}>Salvar alterações</button></div>
+          <div className="orderEditActions"><button onClick={()=>setEditingOrder(false)}>Fechar edição</button><button className="primary" onClick={saveOrderEdit}>Salvar alterações</button></div>
         </div>}
         <div className="stageOnlyFlow">
           {stages.map((stage,index)=>{
@@ -425,12 +434,7 @@ export default function Home(){
           })}
         </div>
         {selected.stage!=='Cancelado'&&<div className="orderDangerZone">
-          <button className="cancelOrderBtn" onClick={async()=>{
-            if(!selected)return
-            if(!window.confirm('Cancelar '+selected.id+'? O pedido será arquivado. Cobranças pendentes serão canceladas, mas pagamentos já baixados serão preservados.'))return
-            await setStage(selected,'Cancelado')
-            setSelected(null)
-          }}>Cancelar pedido</button>
+          <button className="cancelOrderBtn" onClick={cancelSelectedOrder}>Cancelar pedido</button>
         </div>}
       </aside>
     </div>}

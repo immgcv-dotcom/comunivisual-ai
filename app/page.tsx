@@ -107,11 +107,15 @@ export default function Home(){
   const [dashboard,setDashboard]=useState<any>(null)
   const [osMsg,setOsMsg]=useState('')
   const [eventNote,setEventNote]=useState('')
+  const [authInfo,setAuthInfo]=useState<any>(null)
+  const can=(permission:string)=>!!authInfo?.isSuperAdmin||!!authInfo?.permissions?.includes(permission)
   const cvUnits=[['un','Unidade'],['m','Metro'],['m²','Metro quadrado'],['m³','Metro cúbico'],['cm','Centímetro'],['cm²','Centímetro quadrado'],['mm','Milímetro'],['km','Quilômetro'],['kg','Quilograma'],['g','Grama'],['L','Litro'],['mL','Mililitro'],['h','Hora'],['min','Minuto'],['dia','Dia'],['serviço','Serviço'],['kit','Kit'],['par','Par'],['jogo','Jogo'],['rolo','Rolo'],['folha','Folha'],['chapa','Chapa'],['placa','Placa'],['barra','Barra'],['tubo','Tubo'],['perfil','Perfil'],['bobina','Bobina'],['caixa','Caixa'],['pacote','Pacote'],['fardo','Fardo'],['milheiro','Milheiro'],['cento','Cento'],['dúzia','Dúzia'],['resma','Resma'],['galão','Galão'],['lata','Lata'],['frasco','Frasco'],['cartucho','Cartucho'],['peça','Peça']] as const
 
   useEffect(()=>{(async()=>{try{const dr=await fetch('/api/dashboard',{cache:'no-store'});if(dr.ok)setDashboard(await dr.json());const r=await fetch('/api/services',{cache:'no-store'});if(!r.ok) throw new Error();const rows=await r.json();setDbStatus('online');if(rows.length){setServices(rows.map((x:any)=>({dbId:x.id,id:x.code,client:x.client||'Cliente',title:x.title,value:Number(x.total),stage:x.stage as Stage,due:x.due_date?new Date(x.due_date+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—',progress:x.stage==='Cancelado'?0:Math.max(0,Math.round(((stages.indexOf(x.stage as BoardStage)+1)/stages.length)*100)),color:'#3157ff',estimatedCost:Number(x.estimated_cost||0),actualCost:Number(x.actual_cost||0),estimatedMargin:Number(x.estimated_margin||0),minimumMargin:Number(x.minimum_margin||0),suggestedPrice:Number(x.suggested_price||0),quoteValidUntil:x.quote_valid_until||'',paymentTerms:x.payment_terms||'',quoteNotes:x.quote_notes||'',discount:Number(x.discount||0),productionHours:Number(x.production_hours||0),installationHours:Number(x.installation_hours||0),machineHours:Number(x.machine_hours||0),travelKm:Number(x.travel_km||0),installationScheduledAt:x.installation_scheduled_at||'',installationTeam:x.installation_team||'',installationAddress:x.installation_address||'',installationNotes:x.installation_notes||''})));setSelected(null)}}catch{setDbStatus('offline')}})()},[])
 
-  useEffect(()=>{if(section==='dashboard'){loadDashboard();loadFinance();loadMaterials();loadClients();loadCatalog()}},[section])
+  useEffect(()=>{(async()=>{const r=await fetch('/api/auth/me',{cache:'no-store'});if(r.status===401){window.location.href='/login';return}if(r.ok){const x=await r.json();setAuthInfo(x);loadCompany()}})()},[])
+    useEffect(()=>{if(section==='dashboard'){loadDashboard();loadFinance();loadMaterials();loadClients();loadCatalog()}},[section])
+  async function logout(){await fetch('/api/auth/logout',{method:'POST'});window.location.href='/login'}
 
   async function loadCatalog(){const r=await fetch('/api/catalog',{cache:'no-store'});if(r.ok)setCatalog(await r.json().catch(()=>[]));else setCatalogMsg('Não foi possível carregar o catálogo.')}
   async function loadCatalogMaterials(id:string){const r=await fetch('/api/catalog-materials?catalogId='+id,{cache:'no-store'});if(r.ok)setCatalogMaterials(await r.json().catch(()=>[]));else setCatalogMsg('Não foi possível carregar a ficha técnica.')}
@@ -207,16 +211,20 @@ export default function Home(){
     <aside className="sidebar sidebarLabeled">
       <div className="brandBlock"><div className="brandLogo">{brand.logoText}</div><div><strong>{brand.name}</strong><span>ERP inteligente</span></div></div>
       <nav>
-        <button className={section==='dashboard'?'active':''} onClick={()=>setSection('dashboard')}><i className="navIcon">◆</i><span>Dashboard</span></button>
-        <button className={section==='services'?'active':''} onClick={()=>setSection('services')}><i className="navIcon">▦</i><span>Central de Serviços</span></button>
-        <button className={section==='pcp'?'active':''} onClick={()=>{setSection('pcp');loadPcp()}}><i className="navIcon">◫</i><span>PCP / Produção</span></button>
-        <button className={section==='clients'?'active':''} onClick={()=>{setSection('clients');loadClients()}}><i className="navIcon">♙</i><span>Clientes</span></button>
-        <button className={section==='finance'?'active':''} onClick={()=>{setSection('finance');loadFinance()}}><i className="navIcon">◉</i><span>Financeiro</span></button>
-        <button className={section==='catalog'?'active':''} onClick={()=>{setSection('catalog');loadCatalog()}}><i className="navIcon">◇</i><span>Catálogo</span></button>
-        <button className={section==='stock'?'active':''} onClick={()=>{setSection('stock');loadMaterials()}}><i className="navIcon">▤</i><span>Estoque</span></button>
-      </nav>      <div className="sidebarBottom">
-        <button className={section==='brand'?'active':''} onClick={()=>{setSection('brand');loadPricing();loadCompany()}}><i className="navIcon">⚙</i><span>Personalização</span></button>
-        <div className="user"><div className="avatar">{brand.logoText.slice(0,2)}</div><div><b>Administrador</b><small>{brand.name}</small></div></div>
+        {can('dashboard')&&<button className={section==='dashboard'?'active':''} onClick={()=>setSection('dashboard')}><i className="navIcon">◆</i><span>Dashboard</span></button>}
+        {can('services')&&<button className={section==='services'?'active':''} onClick={()=>setSection('services')}><i className="navIcon">▦</i><span>Central de Serviços</span></button>}
+        {can('production')&&<button className={section==='pcp'?'active':''} onClick={()=>{setSection('pcp');loadPcp()}}><i className="navIcon">◫</i><span>PCP / Produção</span></button>}
+        {can('clients')&&<button className={section==='clients'?'active':''} onClick={()=>{setSection('clients');loadClients()}}><i className="navIcon">♙</i><span>Clientes</span></button>}
+        {can('finance')&&<button className={section==='finance'?'active':''} onClick={()=>{setSection('finance');loadFinance()}}><i className="navIcon">◉</i><span>Financeiro</span></button>}
+        {can('catalog')&&<button className={section==='catalog'?'active':''} onClick={()=>{setSection('catalog');loadCatalog()}}><i className="navIcon">◇</i><span>Catálogo</span></button>}
+        {can('stock')&&<button className={section==='stock'?'active':''} onClick={()=>{setSection('stock');loadMaterials()}}><i className="navIcon">▤</i><span>Estoque</span></button>}
+        {can('team')&&<a className="sideLink" href="/equipe"><i className="navIcon">♧</i><span>Equipe e acessos</span></a>}
+        {authInfo?.isSuperAdmin&&<a className="sideLink" href="/plataforma"><i className="navIcon">◎</i><span>Empresas / SaaS</span></a>}
+      </nav>
+      <div className="sidebarBottom">
+        {can('settings')&&<button className={section==='brand'?'active':''} onClick={()=>{setSection('brand');loadPricing();loadCompany()}}><i className="navIcon">⚙</i><span>Personalização</span></button>}
+        <div className="user"><div className="avatar">{(authInfo?.name||brand.logoText).split(' ').map((v:string)=>v[0]).join('').slice(0,2).toUpperCase()}</div><div><b>{authInfo?.name||'Usuário'}</b><small>{authInfo?.companyName||brand.name}</small></div></div>
+        <button className="logoutButton" onClick={logout}><i className="navIcon">↪</i><span>Sair</span></button>
       </div>
     </aside>
 

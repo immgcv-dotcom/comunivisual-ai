@@ -5,6 +5,10 @@ export async function ensureDb(){
  const configuredName=(process.env.DEFAULT_COMPANY_NAME||'Immagine Comunicação Visual').trim()||'Immagine Comunicação Visual'
  const ready=await sql`select to_regclass('public.financial_entries') is not null as ready`
  if(ready[0]?.ready){
+  await sql`alter table financial_entries add column if not exists payment_method text`
+  await sql`alter table financial_entries add column if not exists source_type text`
+  await sql`alter table financial_entries add column if not exists source_id text`
+  await sql`create unique index if not exists financial_source_uidx on financial_entries(company_id,source_type,source_id,entry_type) where source_id is not null`
   let companies=await sql`select id from companies where slug=${configuredSlug} limit 1`
   if(!companies.length){ await sql`insert into companies(name,slug) values (${configuredName},${configuredSlug}) on conflict(slug) do nothing`; companies=await sql`select id from companies where slug=${configuredSlug} limit 1` }
   return companies[0].id as string
@@ -94,6 +98,10 @@ export async function ensureDb(){
  await sql`alter table work_orders add column if not exists public_approved_name text`
  await sql`create table if not exists financial_entries (id uuid primary key default gen_random_uuid(), company_id uuid not null references companies(id) on delete cascade, work_order_id uuid references work_orders(id) on delete set null, entry_type text not null, description text not null, amount numeric(14,2) not null, due_date date, paid_at timestamptz, status text not null default 'pending', created_at timestamptz not null default now())`
  await sql`create unique index if not exists financial_work_order_receivable_uidx on financial_entries(work_order_id,entry_type) where work_order_id is not null and entry_type='receivable'`
+ await sql`alter table financial_entries add column if not exists payment_method text`
+ await sql`alter table financial_entries add column if not exists source_type text`
+ await sql`alter table financial_entries add column if not exists source_id text`
+ await sql`create unique index if not exists financial_source_uidx on financial_entries(company_id,source_type,source_id,entry_type) where source_id is not null`
  let companies=await sql`select id from companies where slug=${configuredSlug} limit 1`
  if(!companies.length){ await sql`insert into companies(name,slug) values (${configuredName},${configuredSlug}) on conflict(slug) do nothing`; companies=await sql`select id from companies where slug=${configuredSlug} limit 1` }
  const companyId=companies[0].id as string

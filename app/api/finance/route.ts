@@ -2,19 +2,70 @@ import { NextResponse } from 'next/server'
 import { getDb } from '@/lib/db'
 import { ensureDb } from '@/lib/bootstrap'
 export const dynamic='force-dynamic'
+
+const validMethods=['Pix','Boleto','Dinheiro','Cartão de débito','Cartão de crédito','Transferência bancária','Cheque','Outro','Não informado']
+
 export async function GET(){
- try{const companyId=await ensureDb();const sql=getDb();const rows=await sql`select f.id,f.work_order_id,f.entry_type,f.description,f.amount,f.due_date,f.paid_at,f.status,f.created_at,w.code from financial_entries f left join work_orders w on w.id=f.work_order_id where f.company_id=${companyId} order by coalesce(f.due_date,current_date),f.created_at desc`;return NextResponse.json(rows)}
- catch{return NextResponse.json({error:'Erro ao carregar financeiro'},{status:500})}
+ try{
+  const companyId=await ensureDb();const sql=getDb()
+  const rows=await sql`select f.id,f.work_order_id,f.entry_type,f.description,f.amount,f.due_date,f.paid_at,f.status,f.payment_method,f.source_type,f.source_id,f.created_at,w.code from financial_entries f left join work_orders w on w.id=f.work_order_id where f.company_id=${companyId} order by coalesce(f.due_date,current_date),f.created_at desc`
+  return NextResponse.json(rows)
+ }catch{return NextResponse.json({error:'Erro ao carregar financeiro'},{status:500})}
 }
 
 export async function PATCH(req:Request){
- try{const companyId=await ensureDb();const sql=getDb();const b=await req.json();if(!b.id)return NextResponse.json({error:'Lançamento obrigatório'},{status:400});const current=await sql`select status,work_order_id,entry_type,description,amount from financial_entries where id=${b.id} and company_id=${companyId} limit 1`;if(!current.length)return NextResponse.json({error:'Lançamento não encontrado'},{status:404});if(current[0].status==='cancelled')return NextResponse.json({error:'Lançamento cancelado não pode receber baixa.'},{status:409});if(!['paid','pending'].includes(String(b.status)))return NextResponse.json({error:'Status financeiro inválido'},{status:400});const status=String(b.status);const rows=await sql`update financial_entries set status=${status},paid_at=case when ${status}='paid' then coalesce(paid_at,now()) else null end where id=${b.id} and company_id=${companyId} returning *`;if(!rows.length)return NextResponse.json({error:'Lançamento não encontrado'},{status:404});const e=rows[0];if(e.work_order_id){await sql`insert into work_order_events(company_id,work_order_id,event_type,title,detail) values(${companyId},${e.work_order_id},'finance',${status==='paid'?'Pagamento/recebimento baixado':'Baixa financeira desfeita'},${e.description+' · R$ '+Number(e.amount).toFixed(2)})`;const costs=await sql`select coalesce(sum(case when entry_type='payable' and status='paid' then amount else 0 end),0) paid_cost from financial_entries where company_id=${companyId} and work_order_id=${e.work_order_id}`;const inventory=await sql`select coalesce(sum(abs(quantity)*unit_cost),0) material_cost from inventory_movements where company_id=${companyId} and work_order_id=${e.work_order_id} and movement_type='consume'`;await sql`update work_orders set actual_cost=${Number(costs[0]?.paid_cost||0)+Number(inventory[0]?.material_cost||0)} where id=${e.work_order_id} and company_id=${companyId}`}return NextResponse.json(e)}catch{return NextResponse.json({error:'Erro ao atualizar financeiro'},{status:500})}
+ try{
+  const companyId=await ensureDb();const sql=getDb();const b=await req.json()
+  if(!b.id)return NextResponse.json({error:'Lançamento obrigatório'},{status:400})
+  const current=await sql`select status,work_order_id,entry_type,description,amount,payment_method from financial_entries where id=${b.id} and company_id=${companyId} limit 1`
+  if(!current.length)return NextResponse.json({error:'Lançamento não encontrado'},{status:404})
+  if(b.paymentMethod!==undefined){
+   const paymentMethod=String(b.paymentMethod||'').trim()
+   if(!validMethods.includes(paymentMethod))return NextResponse.json({error:'Método de pagamento inválido'},{status:400})
+   const rows=await sql`update financial_entries set payment_method=${paymentMethod} where id=${b.id} and company_id=${companyId} returning *`
+   return NextResponse.json(rows[0])
+  }
+  if(current[0].status==='cancelled')return NextResponse.json({error:'Lançamento cancelado não pode receber baixa.'},{status:409})
+  if(!['paid','pending'].includes(String(b.status)))return NextResponse.json({error:'Status financeiro inválido'},{status:400})
+  const status=String(b.status)
+  const rows=await sql`update financial_entries set status=${status},paid_at=case when ${status}='paid' then coalesce(paid_at,now()) else null end where id=${b.id} and company_id=${companyId} returning *`
+  if(!rows.length)return NextResponse.json({error:'Lançamento não encontrado'},{status:404})
+  const e=rows[0]
+  if(e.work_order_id){
+   await sql`insert into work_order_events(company_id,work_order_id,event_type,title,detail) values(${companyId},${e.work_order_id},'finance',${status==='paid'?'Pagamento/recebimento baixado':'Baixa financeira desfeita'},${e.description+' · R$ '+Number(e.amount).toFixed(2)})`
+   const costs=await sql`select coalesce(sum(case when entry_type='payable' and status='paid' then amount else 0 end),0) paid_cost from financial_entries where company_id=${companyId} and work_order_id=${e.work_order_id}`
+   const inventory=await sql`select coalesce(sum(abs(quantity)*unit_cost),0) material_cost from inventory_movements where company_id=${companyId} and work_order_id=${e.work_order_id} and movement_type='consume'`
+   await sql`update work_orders set actual_cost=${Number(costs[0]?.paid_cost||0)+Number(inventory[0]?.material_cost||0)} where id=${e.work_order_id} and company_id=${companyId}`
+  }
+  return NextResponse.json(e)
+ }catch{return NextResponse.json({error:'Erro ao atualizar financeiro'},{status:500})}
 }
 
 export async function POST(req:Request){
- try{const companyId=await ensureDb();const sql=getDb();const b=await req.json();if(!['payable','receivable'].includes(String(b.entryType)))return NextResponse.json({error:'Tipo de lançamento inválido'},{status:400});const entryType=String(b.entryType);const description=String(b.description||'').trim();const amount=Number(b.amount);if(!description||!Number.isFinite(amount)||amount<=0)return NextResponse.json({error:'Descrição e valor são obrigatórios'},{status:400});const dueDate=b.dueDate?String(b.dueDate):null;if(dueDate&&!/^\d{4}-\d{2}-\d{2}$/.test(dueDate))return NextResponse.json({error:'Data de vencimento inválida'},{status:400});const workOrderId=b.workOrderId?String(b.workOrderId):null;if(workOrderId){const own=await sql`select id from work_orders where id=${workOrderId} and company_id=${companyId} limit 1`;if(!own.length)return NextResponse.json({error:'OS não encontrada'},{status:404})}const rows=await sql`insert into financial_entries(company_id,work_order_id,entry_type,description,amount,due_date,status) values(${companyId},${workOrderId},${entryType},${description},${amount},${dueDate},'pending') returning *`;if(workOrderId){await sql`insert into work_order_events(company_id,work_order_id,event_type,title,detail) values(${companyId},${workOrderId},'finance',${entryType==='payable'?'Custo lançado':'Recebimento lançado'},${description+' · R$ '+amount.toFixed(2)})`};return NextResponse.json(rows[0],{status:201})}catch{return NextResponse.json({error:'Erro ao criar lançamento'},{status:500})}
+ try{
+  const companyId=await ensureDb();const sql=getDb();const b=await req.json()
+  if(!['payable','receivable'].includes(String(b.entryType)))return NextResponse.json({error:'Tipo de lançamento inválido'},{status:400})
+  const entryType=String(b.entryType),description=String(b.description||'').trim(),amount=Number(b.amount)
+  if(!description||!Number.isFinite(amount)||amount<=0)return NextResponse.json({error:'Descrição e valor são obrigatórios'},{status:400})
+  const dueDate=b.dueDate?String(b.dueDate):null
+  if(dueDate&&!/^\d{4}-\d{2}-\d{2}$/.test(dueDate))return NextResponse.json({error:'Data de vencimento inválida'},{status:400})
+  const paymentMethod=b.paymentMethod?String(b.paymentMethod).trim():null
+  if(paymentMethod&&!validMethods.includes(paymentMethod))return NextResponse.json({error:'Método de pagamento inválido'},{status:400})
+  const status=b.status==='paid'?'paid':'pending'
+  const workOrderId=b.workOrderId?String(b.workOrderId):null
+  if(workOrderId){const own=await sql`select id from work_orders where id=${workOrderId} and company_id=${companyId} limit 1`;if(!own.length)return NextResponse.json({error:'OS não encontrada'},{status:404})}
+  const rows=await sql`insert into financial_entries(company_id,work_order_id,entry_type,description,amount,due_date,status,paid_at,payment_method) values(${companyId},${workOrderId},${entryType},${description},${amount},${dueDate},${status},case when ${status}='paid' then now() else null end,${paymentMethod}) returning *`
+  if(workOrderId){await sql`insert into work_order_events(company_id,work_order_id,event_type,title,detail) values(${companyId},${workOrderId},'finance',${entryType==='payable'?'Custo lançado':'Recebimento lançado'},${description+' · R$ '+amount.toFixed(2)})`}
+  return NextResponse.json(rows[0],{status:201})
+ }catch{return NextResponse.json({error:'Erro ao criar lançamento'},{status:500})}
 }
 
 export async function DELETE(req:Request){
- try{const companyId=await ensureDb();const sql=getDb();const b=await req.json();if(!b.id)return NextResponse.json({error:'Lançamento obrigatório'},{status:400});const rows=await sql`delete from financial_entries where id=${b.id} and company_id=${companyId} and work_order_id is null returning id`;if(!rows.length)return NextResponse.json({error:'Lançamentos gerados por OS não podem ser excluídos manualmente.'},{status:409});return NextResponse.json({ok:true})}catch{return NextResponse.json({error:'Erro ao excluir lançamento'},{status:500})}
+ try{
+  const companyId=await ensureDb();const sql=getDb();const b=await req.json()
+  if(!b.id)return NextResponse.json({error:'Lançamento obrigatório'},{status:400})
+  const rows=await sql`delete from financial_entries where id=${b.id} and company_id=${companyId} and work_order_id is null and source_id is null returning id`
+  if(!rows.length)return NextResponse.json({error:'Lançamentos automáticos de OS ou estoque não podem ser excluídos manualmente.'},{status:409})
+  return NextResponse.json({ok:true})
+ }catch{return NextResponse.json({error:'Erro ao excluir lançamento'},{status:500})}
 }

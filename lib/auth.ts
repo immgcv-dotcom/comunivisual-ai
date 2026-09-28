@@ -1,0 +1,20 @@
+import { cookies } from 'next/headers'
+import { createHash,randomBytes,scrypt as scryptCb,timingSafeEqual } from 'crypto'
+import { promisify } from 'util'
+import { getDb } from './db'
+const scrypt=promisify(scryptCb)
+export const SESSION_COOKIE='cv_session'
+export const ALL_PERMISSIONS=['dashboard','services','clients','production','finance','catalog','stock','settings','team'] as const
+export type Permission=typeof ALL_PERMISSIONS[number]
+export const ROLE_PERMISSIONS:Record<string,Permission[]>={owner:[...ALL_PERMISSIONS],admin:[...ALL_PERMISSIONS],commercial:['dashboard','services','clients','catalog'],production:['dashboard','services','production','stock'],finance:['dashboard','finance'],stock:['dashboard','stock'],member:['dashboard']}
+export const ROLE_LABELS:Record<string,string>={owner:'Proprietário',admin:'Administrador',commercial:'Comercial',production:'Produção',finance:'Financeiro',stock:'Estoque',member:'Acesso básico',custom:'Personalizado'}
+export const normalizeEmail=(email:string)=>String(email||'').trim().toLowerCase()
+export const hashToken=(token:string)=>createHash('sha256').update(token).digest('hex')
+export const newOpaqueToken=()=>randomBytes(32).toString('base64url')
+export async function hashPassword(password:string){const salt=randomBytes(16),key=await scrypt(password,salt,64) as Buffer;return 'scrypt$'+salt.toString('hex')+'$'+key.toString('hex')}
+export async function verifyPassword(password:string,stored:string){try{const [kind,saltHex,keyHex]=String(stored||'').split('$');if(kind!=='scrypt'||!saltHex||!keyHex)return false;const expected=Buffer.from(keyHex,'hex'),key=await scrypt(password,Buffer.from(saltHex,'hex'),expected.length) as Buffer;return expected.length===key.length&&timingSafeEqual(expected,key)}catch{return false}}
+export function effectivePermissions(role:string,extra:unknown,isSuperAdmin=false):Permission[]{if(isSuperAdmin)return [...ALL_PERMISSIONS];const base=ROLE_PERMISSIONS[role]||ROLE_PERMISSIONS.member,list=Array.isArray(extra)?extra.map(String):[];return Array.from(new Set([...base,...list.filter((x):x is Permission=>(ALL_PERMISSIONS as readonly string[]).includes(x))]))}
+export async function getAuthContext(){const jar=await cookies(),raw=jar.get(SESSION_COOKIE)?.value;if(!raw)return null;const sql=getDb(),tokenHash=hashToken(raw);const rows=await sql`select s.id session_id,s.user_id,s.company_id,s.expires_at,u.name,u.email,u.is_super_admin,cu.role,cu.permissions,c.name company_name,c.slug,c.plan,c.user_limit from user_sessions s join app_users u on u.id=s.user_id and u.status='active' join companies c on c.id=s.company_id and c.status='active' left join company_users cu on cu.user_id=u.id and cu.company_id=c.id and cu.active=true where s.token_hash=${tokenHash} and s.expires_at>now() and (u.is_super_admin=true or cu.id is not null) limit 1`;if(!rows.length)return null;const x=rows[0];return {sessionId:String(x.session_id),userId:String(x.user_id),companyId:String(x.company_id),name:String(x.name),email:String(x.email),isSuperAdmin:!!x.is_super_admin,role:String(x.role||'member'),permissions:effectivePermissions(String(x.role||'member'),x.permissions,!!x.is_super_admin),companyName:String(x.company_name),companySlug:String(x.slug),plan:String(x.plan||'professional'),userLimit:Number(x.user_limit||10)}}
+export async function createSessionRecord(userId:string,companyId:string,meta?:{ip?:string|null,userAgent?:string|null}){const token=newOpaqueToken(),sql=getDb();await sql`delete from user_sessions where expires_at<=now()`;await sql`insert into user_sessions(user_id,company_id,token_hash,expires_at,ip_address,user_agent) values(${userId},${companyId},${hashToken(token)},now()+interval '30 days',${meta?.ip||null},${meta?.userAgent||null})`;return token}
+export const sessionCookieOptions={httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax' as const,path:'/',maxAge:60*60*24*30}
+export function requestMeta(req:Request){return {ip:req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()||null,userAgent:req.headers.get('user-agent')||null}}

@@ -49,6 +49,7 @@ export default function Home(){
   const [filter,setFilter]=useState<'Todos'|Stage>('Todos')
   const [services,setServices]=useState(initialServices)
   const [selected,setSelected]=useState<Service|null>(null)
+  const [chargeStatus,setChargeStatus]=useState<{loading:boolean;exists:boolean;status:string;amount:number}>({loading:false,exists:false,status:'none',amount:0})
   const [editingOrder,setEditingOrder]=useState(false)
   const [orderEdit,setOrderEdit]=useState({clientId:'',title:'',total:'',due:''})
   const [brand,setBrand]=useState({name:'ComuniVisual AI', primary:'#3157ff', accent:'#16c79a', logoText:'CV'})
@@ -166,9 +167,17 @@ export default function Home(){
   const financeScale=Math.max(1,pendingReceivables,paidReceivables,pendingPayables,paidPayables)
   const lowStockNow=materials.filter((m:any)=>Number(m.stock_quantity)<=Number(m.min_stock)).length
 
-  function openService(s:Service){setSelected(s);setEditingOrder(false);setOsMsg('')}
+  async function loadChargeStatus(s:Service){
+    if(!s.dbId){setChargeStatus({loading:false,exists:false,status:'none',amount:0});return}
+    setChargeStatus(v=>({...v,loading:true}))
+    const r=await fetch('/api/charge-share?workOrderId='+encodeURIComponent(s.dbId),{cache:'no-store'})
+    const x=await r.json().catch(()=>({}))
+    if(r.ok)setChargeStatus({loading:false,exists:!!x.exists,status:String(x.status||'none'),amount:Number(x.amount||0)})
+    else setChargeStatus({loading:false,exists:false,status:'none',amount:0})
+  }
+  function openService(s:Service){setSelected(s);setEditingOrder(false);setOsMsg('');loadChargeStatus(s)}
   async function startOrderEdit(s:Service){
-    setSelected(s);setOsMsg('')
+    setSelected(s);setOsMsg('');loadChargeStatus(s)
     if(!clients.length)await loadClients()
     setOrderEdit({clientId:s.clientId||'',title:s.title,total:String(s.value||0),due:s.dueIso||''})
     setEditingOrder(true)
@@ -199,7 +208,7 @@ export default function Home(){
     const updated={...s,stage:next,progress}
     setServices(prev=>prev.map(x=>x.id===s.id?updated:x))
     if(selected?.id===s.id) setSelected(updated)
-    if(s.dbId){const r=await fetch('/api/services',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:s.dbId,stage:next})});if(!r.ok){const x=await r.json().catch(()=>({}));setServices(prev=>prev.map(v=>v.id===s.id?s:v));if(selected?.id===s.id)setSelected(s);setOsMsg(x.error==='Estoque insuficiente'?'Produção bloqueada: '+(x.shortages||[]).map((m:any)=>m.material+' (precisa '+m.required+', disponível '+m.available+')').join('; '):(x.error||'Não foi possível alterar a etapa.'));return}setDbStatus('online');await Promise.all([loadDashboard(),loadEvents(updated),loadOsResult(updated)]);}
+    if(s.dbId){const r=await fetch('/api/services',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:s.dbId,stage:next})});if(!r.ok){const x=await r.json().catch(()=>({}));setServices(prev=>prev.map(v=>v.id===s.id?s:v));if(selected?.id===s.id)setSelected(s);setOsMsg(x.error==='Estoque insuficiente'?'Produção bloqueada: '+(x.shortages||[]).map((m:any)=>m.material+' (precisa '+m.required+', disponível '+m.available+')').join('; '):(x.error||'Não foi possível alterar a etapa.'));return}setDbStatus('online');await Promise.all([loadDashboard(),loadEvents(updated),loadOsResult(updated),loadChargeStatus(updated)]);}
   }
 
   async function shareQuoteWhatsApp(){if(!selected?.dbId)return;const r=await fetch('/api/quote-share',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:selected.dbId})});const x=await r.json();if(!r.ok){setQuoteMsg(x.error||'Erro ao gerar link.');return}const msg='Olá! Segue o orçamento '+selected.id+' referente a '+selected.title+'. Valor: '+money(selected.value)+'. Veja os detalhes e aprove pelo link: '+x.url;window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank')}
@@ -376,16 +385,19 @@ export default function Home(){
                 {stage==='Aprovado'&&<small>Cobrança criada automaticamente e mantida no Financeiro até você dar baixa.</small>}
               </div>
               {current&&stage==='Orçamento'&&<button className="primary" onClick={()=>moveStage(selected,1)}>Aprovar e gerar cobrança →</button>}
-              {current&&stage==='Aprovado'&&<div className="stageOnlyActions"><button className="whatsappCharge" onClick={async()=>{
-                if(!selected?.dbId)return;
-                const r=await fetch('/api/charge-share',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workOrderId:selected.dbId})});
-                const x=await r.json().catch(()=>({}));
-                if(!r.ok){setOsMsg(x.error||'Não foi possível gerar a cobrança.');return}
-                if(x.status==='paid'){setOsMsg('Esta cobrança já foi baixada como paga no Financeiro.');return}
-                window.open(x.waUrl||x.url,'_blank')
-              }}>Enviar cobrança no WhatsApp</button><button className="primary" onClick={()=>moveStage(selected,1)}>Enviar para produção →</button></div>}
-              {current&&stage==='Produção'&&<button className="primary" onClick={()=>moveStage(selected,1)}>Concluir OS →</button>}
-              {current&&stage==='Concluído'&&<strong className="stageDoneLabel">Concluído</strong>}
+              {current&&['Aprovado','Produção','Concluído'].includes(stage)&&<div className="stageOnlyActions">
+                {chargeStatus.loading?<span className="chargeState">Verificando cobrança...</span>:chargeStatus.exists&&chargeStatus.status==='pending'?<button className="whatsappCharge" onClick={async()=>{
+                  if(!selected?.dbId)return
+                  const r=await fetch('/api/charge-share',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({workOrderId:selected.dbId})})
+                  const x=await r.json().catch(()=>({}))
+                  if(!r.ok){setOsMsg(x.error||'Não foi possível gerar a cobrança.');return}
+                  if(x.status==='paid'){setChargeStatus({loading:false,exists:true,status:'paid',amount:Number(x.amount||0)});setOsMsg('Esta cobrança já foi baixada como paga no Financeiro.');return}
+                  window.open(x.waUrl||x.url,'_blank')
+                }}>Enviar cobrança no WhatsApp · {money(chargeStatus.amount||selected.value)}</button>:chargeStatus.exists&&chargeStatus.status==='paid'?<span className="chargePaid">✓ Cobrança baixada</span>:null}
+                {stage==='Aprovado'&&<button className="primary" onClick={()=>moveStage(selected,1)}>Enviar para produção →</button>}
+                {stage==='Produção'&&<button className="primary" onClick={()=>moveStage(selected,1)}>Concluir OS →</button>}
+                {stage==='Concluído'&&<button className="reopenOrderBtn" onClick={()=>setStage(selected,'Produção')}>← Voltar para produção</button>}
+              </div>}
             </div>
           })}
         </div>

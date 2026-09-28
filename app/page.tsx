@@ -51,8 +51,6 @@ export default function Home(){
   const [companyInfo,setCompanyInfo]=useState({document:'',legalName:'',tradeName:'',stateRegistration:'',postalCode:'',street:'',number:'',complement:'',district:'',city:'',state:'',phone:'',whatsapp:'',email:'',logoUrl:''})
   const [companyMsg,setCompanyMsg]=useState('')
   const [showNew,setShowNew]=useState(false)
-  const [aiText,setAiText]=useState('')
-  const [aiResult,setAiResult]=useState<string | null>(null)
   const [newService,setNewService]=useState({clientId:'',client:'',title:'',total:'',due:''})
   const [dbStatus,setDbStatus]=useState<'loading'|'online'|'offline'>('loading')
   const [dragging,setDragging]=useState<string|null>(null)
@@ -183,13 +181,7 @@ export default function Home(){
     await setStage(s,stages[target])
   }
 
-  function runAI(){
-    const t=aiText.toLowerCase()
-    let response='Interpretei o pedido e preparei uma estrutura inicial de orçamento. Revise medidas e materiais antes de aprovar.'
-    if(t.includes('fachada')) response='Sugestão: fachada em ACM + estrutura metálica + acabamento + instalação. Posso transformar isso em orçamento, lista de materiais e etapas de produção.'
-    if(t.includes('adesiv')) response='Sugestão: calcular área de impressão, laminação, perda, aplicação e tempo de produção. Posso montar a composição do orçamento automaticamente.'
-    setAiResult(response)
-  }
+
 
   return <div className="app" style={{'--primary':brand.primary,'--accent':brand.accent} as React.CSSProperties}>
     <aside className="sidebar">
@@ -218,7 +210,7 @@ export default function Home(){
           <div className="metric"><span>Concluído recente</span><b>{money(totalDone)}</b><small>serviços finalizados</small></div>
         </section>
 
-        <section className="aiBox"><div className="aiIcon">✦</div><div className="aiContent"><b>Assistente IA</b><span>Descreva o serviço e deixe a IA preparar orçamento, materiais e produção.</span><div className="aiRow"><input value={aiText} onChange={e=>setAiText(e.target.value)} placeholder='Ex.: fachada de ACM preta 5,80 x 1,10 com letras em PVC e instalação'/><button onClick={runAI}>Gerar</button></div>{aiResult&&<div className="aiResult">{aiResult}</div>}</div></section>
+
 
         <div className="serviceToolbar"><div className="filters"><button className={filter==='Todos'?'selected':''} onClick={()=>setFilter('Todos')}>Todos <em>{services.length}</em></button>{stages.map(s=><button key={s} className={filter===s?'selected':''} onClick={()=>setFilter(s)}>{s} <em>{services.filter(x=>x.stage===s).length}</em></button>)}<button className={filter==='Cancelado'?'selected':''} onClick={()=>setFilter('Cancelado')}>Cancelados <em>{services.filter(x=>x.stage==='Cancelado').length}</em></button></div><div className="viewSwitch"><button className={viewMode==='kanban'?'selected':''} onClick={()=>setViewMode('kanban')}>▦ Quadro</button><button className={viewMode==='list'?'selected':''} onClick={()=>setViewMode('list')}>☷ Lista</button></div></div>
 

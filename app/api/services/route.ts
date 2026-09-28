@@ -103,7 +103,7 @@ export async function PATCH(req:Request){
   if(!currentRows.length)return NextResponse.json({error:'OS não encontrada'},{status:404})
   const current=String(currentRows[0].stage),next=String(b.stage)
   if(current==='Cancelado'&&next!=='Cancelado')return NextResponse.json({error:'OS cancelada está arquivada.'},{status:409})
-  if(current==='Concluído'&&!['Concluído','Produção'].includes(next))return NextResponse.json({error:'Uma OS concluída só pode ser reaberta para Produção.'},{status:409})
+  if(current==='Concluído'&&!['Concluído','Produção','Cancelado'].includes(next))return NextResponse.json({error:'Uma OS concluída só pode voltar para Produção ou ser cancelada.'},{status:409})
   if(current===next)return NextResponse.json(currentRows[0])
   if(next!=='Cancelado'){
    const reopening=current==='Concluído'&&next==='Produção'

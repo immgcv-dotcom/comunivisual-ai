@@ -424,6 +424,14 @@ export default function Home(){
             </div>
           })}
         </div>
+        {selected.stage!=='Cancelado'&&<div className="orderDangerZone">
+          <button className="cancelOrderBtn" onClick={async()=>{
+            if(!selected)return
+            if(!window.confirm('Cancelar '+selected.id+'? O pedido será arquivado. Cobranças pendentes serão canceladas, mas pagamentos já baixados serão preservados.'))return
+            await setStage(selected,'Cancelado')
+            setSelected(null)
+          }}>Cancelar pedido</button>
+        </div>}
       </aside>
     </div>}
 

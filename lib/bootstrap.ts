@@ -1,5 +1,4 @@
 import { getDb } from './db'
-import { seedDemoData } from './demo-seed'
 export async function ensureDb(){
  const sql=getDb()
  await sql`create table if not exists companies (id uuid primary key default gen_random_uuid(), name text not null, slug text unique not null, primary_color text not null default '#3157ff', accent_color text not null default '#16c79a', created_at timestamptz not null default now())`
@@ -92,6 +91,5 @@ export async function ensureDb(){
  let companies=await sql`select id from companies where slug=${configuredSlug} limit 1`
  if(!companies.length){ await sql`insert into companies(name,slug) values (${configuredName},${configuredSlug}) on conflict(slug) do nothing`; companies=await sql`select id from companies where slug=${configuredSlug} limit 1` }
  const companyId=companies[0].id as string
- if(process.env.DEMO_SEED==='true')await seedDemoData(sql,companyId)
  return companyId
 }

@@ -1,6 +1,8 @@
 import { getDb } from './db'
 export async function ensureDb(){
  const sql=getDb()
+ const configuredSlug=(process.env.DEFAULT_COMPANY_SLUG||'immagine').trim().toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'')||'immagine'
+ const configuredName=(process.env.DEFAULT_COMPANY_NAME||'Immagine Comunicação Visual').trim()||'Immagine Comunicação Visual'
  const ready=await sql`select to_regclass('public.financial_entries') is not null as ready`
  if(ready[0]?.ready){
   let companies=await sql`select id from companies where slug=${configuredSlug} limit 1`
